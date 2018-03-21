@@ -4,7 +4,7 @@ extern  int       period1 = 60;
 extern  int       period2 = 60;
 extern  int       period3 = 60;
 extern  int       period4 = 60;
-extern  int       timeFrame = 15;
+extern  int       tf_sr   = 15;
 
 string  indicatorName = "#MTF SR";
 
@@ -17,27 +17,29 @@ class CMtfSupport{
     int       _TimeFrame;
     double    _Support;
     double    _Resistance;
+    string    _symbol;
   public:
     
-    CMtfSupport() : _Period1(period1)
+    CMtfSupport(string symbol) : _Period1(period1)
                    ,_Period2(period2)
                    ,_Period3(period3)
                    ,_Period4(period4)
                    ,_Support(-1)
                    ,_Resistance(-1)
-                   ,_TimeFrame(timeFrame){
+                   ,_TimeFrame(tf_sr)
+                   ,_symbol(symbol){
       
     }
     ~CMtfSupport(){
 
     }
 
-    bool Refresh(string symbol, int index){
+    bool Refresh(int index){
       _Support = -1;
       _Resistance = -1;
-      double support = iCustom(symbol,_TimeFrame,indicatorName,_Period1,_Period2,_Period3,_Period4,
+      double support = iCustom(_symbol,_TimeFrame,indicatorName,_Period1,_Period2,_Period3,_Period4,
                                 true,true,true,true,true,3,index);
-      double resistance = iCustom(symbol,_TimeFrame,indicatorName,_Period1,_Period2,_Period3,_Period4,
+      double resistance = iCustom(_symbol,_TimeFrame,indicatorName,_Period1,_Period2,_Period3,_Period4,
                                   true,true,true,true,true,4,index);
       _Support = MathMin( support, resistance );
       _Resistance = MathMax( support, resistance  );
@@ -61,7 +63,7 @@ class CMtfSupport{
       else
         return(false);
     }
-}
+};
 
 
 /*
@@ -94,4 +96,4 @@ void getZigArrow(){
    }
    
    //Print("value--->"+NormalizeDouble(value,5));
-}
+}*/
