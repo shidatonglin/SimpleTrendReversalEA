@@ -1,23 +1,28 @@
 
-extern  int  timeframe  =  15;
+extern  int                 tf_T3        =  30;
+extern  int                 t3Period     =  10;
+extern  ENUM_APPLIED_PRICE  appliedPrice =  PRICE_CLOSE;
+extern  double              b            =  0.618;
 
-string indicatorName = "T3_clean";
+
+string T3_CLEAN = "T3_clean";
 class CT3Clean{
 
 private:
-	int  _TimeFrame;
+	int    _TimeFrame;
+	string _symbol;
 public :
-	CT3Clean() : _TimeFrame(timeframe){
+	CT3Clean(string symbol) : _TimeFrame(tf_T3)
+	                        , _symbol(symbol){
 
 	}
-	~CT3Clean(){
-
-	}
+	~CT3Clean(){}
 
 	double getValue(string symbol, int index){
 		return iCustom(symbol,_TimeFrame,indicatorName,10,0,0.618,15,1,index);
 	}
-}
+};
 
 /*
 double value = iCustom(NULL,PERIOD_M15,"T3_clean",10,0,0.618,15,1,1);
+*/

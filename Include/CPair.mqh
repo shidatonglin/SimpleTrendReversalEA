@@ -193,11 +193,11 @@ public:
       if (UseNewsFilter)
       {
          color newsColor = _allowedToTradeNews ? zigClr : clrGray;
-         DrawRect(line, xpos, zigClr,60 ); xpos+=60;
+         DrawRect(line, xpos, newsColor,60 ); xpos+=60;
       }   
       
       color timeColor = _allowedToTradeTimeFilter ? zigClr : clrGray;
-      DrawRect(line, xpos, zigClr,60 ); xpos+=60;
+      DrawRect(line, xpos, timeColor,60 ); xpos+=60;
          
       color validColor = ( SignalCount() == GetMaxSignalCount() ) ? zigClr : clrGray;
       DrawRect(line, xpos, validColor, 60  );xpos+=60;
