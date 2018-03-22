@@ -71,6 +71,13 @@ public:
       _notifyCount = 0;
    }
    
+   ~CNotifyManager(){
+      int total = ArraySize(_notifies);
+      for(int i=0; i<total; i++){
+         delete _notifies[i];
+      }
+   }
+   
    //--------------------------------------------------------------------
    void SendNotify(string symbol, string uniquekey, bool sendEmail,  string text)
    {
@@ -189,4 +196,4 @@ public:
    }
 };
 
-CUtils* _utils = new CUtils();
+//CUtils* _utils = new CUtils();

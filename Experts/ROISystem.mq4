@@ -54,6 +54,8 @@ CLine*           _line5;
 CLabelKeyValue*  _labelTotalLotsTraded;
 CLabelKeyValue*  _labelAverageLotsPerTrade;
 
+CUtils* _utils;
+
 CPair* _pairs[];
 int    _pairCount=0;
 

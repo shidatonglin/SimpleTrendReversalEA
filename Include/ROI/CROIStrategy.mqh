@@ -32,6 +32,7 @@ public :
 		_mtfSupport     = new CMtfSupport(_symbol);
 		_t3clean        = new CT3Clean(_symbol);
 		_signal         = new CSignal();
+		_zigZag         = new CZigZag();
 		_indicatorCount = 0;
 		ArrayResize( _indicators, 10 );
 		if (UseMTFSR) {
@@ -51,7 +52,9 @@ public :
 	}
 	~CROIStrategy(){
 		delete _zigZag;
-	    delete _signal;
+	   delete _signal;
+	   delete _t3clean;
+	   delete _mtfSupport;
 		for (int i=0; i < _indicatorCount;++i){
     	    delete _indicators[i];
         }
