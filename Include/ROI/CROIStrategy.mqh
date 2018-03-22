@@ -33,27 +33,27 @@ public :
 		_indicatorCount = 0;
 		ArrayResize( _indicators, 10 );
 		if (UseMTFSR) {
-			_indicatorCount++;
 			_indicators[_indicatorCount] = new CIndicator("MtfSR");
+            _indicatorCount++;
 		}
-    if (UseT3Clean) {
-    	_indicatorCount++;
-    	_indicators[_indicatorCount] = new CIndicator("T3Clean");
-    }
-    if (UseZigZag) {
-    	_indicatorCount++;
-    	_indicators[_indicatorCount] = new CIndicator("ZigZagPercentual");
-    }
-    if(UseCurrent) _index = 0;
-    else _index = 1;
+        if (UseT3Clean) {
+            _indicators[_indicatorCount] = new CIndicator("T3Clean");
+            _indicatorCount++;
+        }
+        if (UseZigZag) {
+            _indicators[_indicatorCount] = new CIndicator("ZigZagPercentual");
+            _indicatorCount++;
+        }
+        if(UseCurrent) _index = 0;
+        else _index = 1;
 	}
 	~CROIStrategy(){
 		delete _zigZag;
 	    delete _signal;
 		for (int i=0; i < _indicatorCount;++i){
-    	delete _indicators[i];
-  	}
-  	ArrayFree(_indicators);
+    	    delete _indicators[i];
+        }
+        ArrayFree(_indicators);
 	}
 
 	CSignal* Refresh(){
@@ -68,27 +68,41 @@ public :
 			mtfSrBreakUp = true;
 		}
         if(closePrice < support && closePricePre > support){
-        mtfSrBreakDown = true;
+            mtfSrBreakDown = true;
         }
 
         double t3clen = _t3clean.getValue(_symbol, _index);
         if(mtfSrBreakUp && closePrice > t3clen){
-        t3CleanOK = true;
+            t3CleanOK = true;
         }
         if(mtfSrBreakDown && closePrice < t3clen){
-        t3CleanOK = true;
+            t3CleanOK = true;
         }
 
         // clear indicators
         for (int i=0; i < _indicatorCount;++i)
         {
-        _indicators[i].IsValid = false;
+            _indicators[i].IsValid = false;
         }
         _signal.Reset();
-
+        int index = 0;
         if(UseMTFSR){
-        
+            if(mtfSrBreakUp){
+                _signal.IsBuy = true;
+                _indicators[index].IsValid = true; 
+                index++;
+            }
+            if(mtfSrBreakDown){
+                _signal.IsSell = true;
+                _indicators[index].IsValid = true;
+                index++;
+            }
         }
+        if(UseT3Clean){
+            _indicators[index].IsValid = t3CleanOK; 
+            index++;
+        }
+        return _signal;
 	}
 
 	//--------------------------------------------------------------------
