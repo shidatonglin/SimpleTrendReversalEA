@@ -45,11 +45,11 @@ public :
 	}
 	~CROIStrategy(){
 		delete _zigZag;
-	   delete _signal;
+	    delete _signal;
 		for (int i=0; i < _indicatorCount;++i){
         	delete _indicators[i];
-      }
-      ArrayFree(_indicators);
+      	}
+      	ArrayFree(_indicators);
 	}
 
 	CSignal* Refresh(){
