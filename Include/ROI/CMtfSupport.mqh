@@ -1,10 +1,10 @@
 
-extern  string    __mtfSRSetting = "#MTF SR Setting";
+extern  string    __mtfSRSetting = "------#MTF SR Setting------";
 extern  int       period1 = 60;
 extern  int       period2 = 60;
 extern  int       period3 = 60;
 extern  int       period4 = 60;
-extern  int       tf_sr   = 15;
+//extern  int       tf_sr   = 15;
 
 string  indicatorName = "#MTF SR";
 
@@ -26,7 +26,7 @@ class CMtfSupport{
                    ,_Period4(period4)
                    ,_Support(-1)
                    ,_Resistance(-1)
-                   ,_TimeFrame(tf_sr)
+                   ,_TimeFrame(0)
                    ,_symbol(symbol){
       
     }

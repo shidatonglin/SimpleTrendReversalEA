@@ -1,9 +1,11 @@
 
+
+extern  string    __ROIStrategySetting = "------ROI Strategy Setting------";
 extern    bool    UseMTFSR = true;
 extern    bool    UseT3Clean = true;
 extern    bool    UseZigZag  = false;
 extern    bool    UseCurrent = false;
-extern    int     TimeFrame  = 240;
+extern    int     TimeFrame  = 15;
 
 #include <CStrategy.mqh>
 #include <ROI\CMtfSupport.mqh>
@@ -58,7 +60,7 @@ public :
 
 	CSignal* Refresh(){
 		bool mtfSrBreakUp = false, mtfSrBreakDown = false, t3CleanOK = false;
-		_mtfSupport.Refresh(_symbol, _index);
+		_mtfSupport.Refresh(_index);
 		double support = _mtfSupport.GetSupport(_index);
 		double resistance = _mtfSupport.GetResistance(_index);
 		double closePrice = iClose( _symbol, TimeFrame , _index );
