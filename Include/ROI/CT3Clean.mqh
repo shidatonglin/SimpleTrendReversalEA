@@ -15,8 +15,7 @@ public :
 	}
 
 	double getValue(string symbol, int index){
-		double value = iCustom(symbol,_TimeFrame,indicatorName,10,0,0.618,15,1,index);
-		return value;
+		return iCustom(symbol,_TimeFrame,indicatorName,10,0,0.618,15,1,index);
 	}
 }
 
