@@ -94,9 +94,9 @@ class CiStochastic : CIndicator
 };
 
 
-void CiStochastic::CiStochastic(string pSymbol,int pTimeFrame,int pKPeriod,int pDPeriod,int pSlowing,int pMethod,int pAppliedPrice)
+void CiStochastic::CiStochastic(string pSymbol,int pTimeFrame,int pKPeriod,int pDPeriod,int pSlowing,int pMethod,int pAppliedPrice): CIndicator(pSymbol, pTimeFrame)
 {
-   Init(pSymbol,pTimeFrame);
+   //Init(pSymbol,pTimeFrame);
    
    _kPeriod = pKPeriod;
    _dPeriod = pDPeriod;
@@ -134,9 +134,9 @@ class CiRSI : CIndicator
 };
 
 
-CiRSI::CiRSI(string pSymbol,int pTimeFrame,int pPeriod,int pAppliedPrice)
+CiRSI::CiRSI(string pSymbol,int pTimeFrame,int pPeriod,int pAppliedPrice): CIndicator(pSymbol, pTimeFrame)
 {
-   Init(pSymbol,pTimeFrame);
+   //Init(pSymbol,pTimeFrame);
    
    _period = pPeriod;
    _appliedPrice = pAppliedPrice;
@@ -168,9 +168,9 @@ class CiBands : CIndicator
       double Lower(int pShift = 0); 
 };
 
-void CiBands::CiBands(string pSymbol,int pTimeFrame,int pPeriod,double pDeviation,int pShift,int pAppliedPrice)
+void CiBands::CiBands(string pSymbol,int pTimeFrame,int pPeriod,double pDeviation,int pShift,int pAppliedPrice): CIndicator(pSymbol, pTimeFrame)
 {
-   Init(pSymbol,pTimeFrame);
+   //Init(pSymbol,pTimeFrame);
    
    _period = pPeriod;
    _deviation = pDeviation;
@@ -215,9 +215,9 @@ class CiMACD : CIndicator
       double Signal(int pShift = 0);
 };
 
-void CiMACD::CiMACD(string pSymbol,int pTimeFrame,int pFastEmaPeriod,int pSlowEmaPeriod,int pSignalPeriod,int pAppliedPrice)
+void CiMACD::CiMACD(string pSymbol,int pTimeFrame,int pFastEmaPeriod,int pSlowEmaPeriod,int pSignalPeriod,int pAppliedPrice): CIndicator(pSymbol, pTimeFrame)
 {
-   CIndicator::Init(pSymbol,pTimeFrame);
+   //CIndicator::Init(pSymbol,pTimeFrame);
    
    _fastEmaPeriod = pFastEmaPeriod;
    _slowEmaPeriod = pSlowEmaPeriod;

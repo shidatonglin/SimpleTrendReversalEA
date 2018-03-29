@@ -7,6 +7,7 @@
 #property link      "https://www.mql5.com"
 #property strict
 
+extern string lsma_setting  = "___LSMA Setting__";
 extern int lsma_period  = 25;
 extern bool userMaAngle = false;
 
@@ -28,6 +29,7 @@ private:
    double           _currentValue;
    LSMA_TREND       _currentTrend;
    int              _digits;
+   int              _period;
    
 public:
 
@@ -38,12 +40,18 @@ public:
       _trendStartBarShift = -1;
       _currentValue = 0.0;
       _digits = (int)MarketInfo(_symbol,MODE_DIGITS);
+      _period = lsma_period;
    }
    
    ~CLSMA(){}
+
+   void SetPeriod(int period){
+      _period = period;
+   }
+   
    LSMA_TREND GetCurrentTrend(int shift = 1){
-      double lsma_up = iCustom(_symbol,_timeFrame,LSMA_NAME,lsma_period,500,1,shift);
-      double lsma_down = iCustom(_symbol,_timeFrame,LSMA_NAME,lsma_period,500,2,shift);
+      double lsma_up = iCustom(_symbol,_timeFrame,LSMA_NAME,_period,500,1,shift);
+      double lsma_down = iCustom(_symbol,_timeFrame,LSMA_NAME,_period,500,2,shift);
       if(lsma_up == EMPTY_VALUE){
          _currentValue = NormalizeDouble( lsma_down, _digits);
          return TREND_SHORT;
@@ -56,7 +64,7 @@ public:
    
    double GetLSMAValue(int shift=1){
       return NormalizeDouble(
-         iCustom(_symbol,_timeFrame,LSMA_NAME,lsma_period,500,0,shift)
+         iCustom(_symbol,_timeFrame,LSMA_NAME,_period,500,0,shift)
          ,_digits);
    }
    
@@ -68,13 +76,13 @@ public:
       for(int i = shift+1; i < shift + 100; i++){
          if(_currentTrend==TREND_LONG){
             // down value
-            tempValue = iCustom(_symbol,_timeFrame,LSMA_NAME,lsma_period,500,2,i);
+            tempValue = iCustom(_symbol,_timeFrame,LSMA_NAME,_period,500,2,i);
             if(tempValue != EMPTY_VALUE){
                return i-1;
             }
          }else if(_currentTrend==TREND_SHORT){
             // up value
-            tempValue = iCustom(_symbol,_timeFrame,LSMA_NAME,lsma_period,500,1,i);
+            tempValue = iCustom(_symbol,_timeFrame,LSMA_NAME,_period,500,1,i);
             if(tempValue != EMPTY_VALUE){
                return i-1;
             }

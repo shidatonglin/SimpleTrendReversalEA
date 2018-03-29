@@ -10,7 +10,7 @@ enum TREND {
 	TREND_LONG,
 	TREND_SHORT,
 	TREND_NONE
-}
+};
 
 
 
@@ -34,7 +34,7 @@ public:
 	double     sDev;
 	
 	CTrend() : _timeFrame(timeFrame)
-	          ,_bars(calculateBar){
+	          ,_maxBars(calculateBar){
 	    ArrayResize(bbMacd , _maxBars + 5, 0);
       	ArrayResize(Upperband, _maxBars + 5, 0);
       	ArrayResize(Lowerband , _maxBars + 5, 0);
@@ -51,10 +51,10 @@ public:
 	}
 
 	void Refresh(){
-		for(int i=0; i<limit; i++)
+		for(int i=0; i<_maxBars; i++)
         	bbMacd[i]=iMA(NULL,0,FastLen,0,MODE_EMA,PRICE_CLOSE,i) 
         			- iMA(NULL,0,SlowLen,0,MODE_EMA,PRICE_CLOSE,i);
-      	for(i=0; i<limit; i++){
+      	for(i=0; i<_maxBars; i++){
 
 	        avg[i]=iMAOnArray(bbMacd,0,Length,0,MODE_EMA,i);
 	        
@@ -63,7 +63,7 @@ public:
 	        Upperband[i] = avg[i] + (StDv * sDev);
 	        Lowerband[i] = avg[i] - (StDv * sDev);
 		    
-		    direction = 0;
+		    direction[i] = 0;
 		    if (bbMacd[i]>bbMacd[i+1])
 		    {
 		    	direction[i]=1;
@@ -75,4 +75,4 @@ public:
 		    }
 		}
 	}
-}
+};

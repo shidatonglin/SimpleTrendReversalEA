@@ -1,15 +1,15 @@
 
-extern int   	timeFrame     = PERIOD_D1;
+extern int   	timeFrame     = PERIOD_H4;
 extern int   	fast_period   = 12;
 extern int   	slow_period   = 24;
 extern int      signal_period = 9;
-extern double   std           = 1.0
+extern double   std           = 1.1;
 
 enum STATUS{
 	UP,    // Main value is bigger than the upper band
 	DOWN,  // Main value is smaller than the low band
 	RANG   // Main value between the upper and low band
-}
+};
 
 string BbMacd_Name = "PakuAK_Marblez";
 
@@ -35,7 +35,7 @@ public:
 	
 	// Default Constructor
 	// Using the external input parameter to construct the object
-	CBbMacd() : _symbol(NULL),
+	CBbMacd(string symbol) : _symbol(symbol),
 				_timeFrame(timeFrame),
 				_fastPeriod(fast_period),
 				_slowPeriod(slow_period),
@@ -44,7 +44,7 @@ public:
 		Init();
 	}
 
-	CBbMacd(string symbol, int tf=0,int fast, int slow, int signal, double stdvalue) 
+	CBbMacd(string symbol, int fast, int slow, int signal, double stdvalue, int tf=0) 
 				: 	_symbol(symbol),
 				    _timeFrame(tf),
 					_fastPeriod(fast),
@@ -56,7 +56,7 @@ public:
 
 	~CBbMacd(){}
 
-	Init(){
+	void Init(){
 		_upperBand=0.0;
 		_lowerBand=0.0;
 		_mainValue=0.0;
@@ -64,7 +64,7 @@ public:
 		_isUp=false;
 	}
 
-	bool Refersh(int shift){
+	void Refersh(int shift){
 		double curUp= iCustom( _symbol, _timeFrame, BbMacd_Name, _fastPeriod,_slowPeriod,_signalPeriod
 							,_std, 0, shift);
 	    double curDown = iCustom( _symbol, _timeFrame, BbMacd_Name, _fastPeriod,_slowPeriod,_signalPeriod
@@ -91,6 +91,17 @@ public:
 		}
 	}
 
+	STATUS Trend(int index){
+		return _status;
+	}
+
+	bool isUp(int index){
+		return _isUp;
+	}
+
+	double MainValue(int index){
+		return _mainValue;
+	}
 	
 
 };

@@ -7,79 +7,84 @@
 #property link      "https://www.mql5.com"
 #property strict
 
-extern int lsma_period  = 25;
-extern bool userMaAngle = false;
+//---- input parameters
+extern double gamma=0.7;
+extern int CountBars=950;
 
 static string LAGUERRE_NAME = "Laguerre";
+   
 
-enum LSMA_TREND{
-   TREND_LONG,
-   TREND_SHORT,
-   TREND_NONE
-};   
-
-class CLSMA{
+class CLaguerre{
 
 private:
 
    string           _symbol;
    int              _timeFrame;
-   int              _trendStartBarShift;
-   double           _currentValue;
-   LSMA_TREND       _currentTrend;
    int              _digits;
+   double           _values[];
    
 public:
 
-   CLSMA(string symbol, int timeframe=0):
+   CLaguerre(string symbol, int timeframe=0):
                _symbol(symbol),
                _timeFrame(timeframe){
-      _currentTrend = TREND_NONE;
-      _trendStartBarShift = -1;
-      _currentValue = 0.0;
       _digits = (int)MarketInfo(_symbol,MODE_DIGITS);
    }
    
-   ~CLSMA(){}
-   LSMA_TREND GetCurrentTrend(int shift = 1){
-      double lsma_up = iCustom(_symbol,_timeFrame,LSMA_NAME,lsma_period,500,1,shift);
-      double lsma_down = iCustom(_symbol,_timeFrame,LSMA_NAME,lsma_period,500,2,shift);
-      if(lsma_up == EMPTY_VALUE){
-         _currentValue = NormalizeDouble( lsma_down, _digits);
-         return TREND_SHORT;
-      }else if(lsma_down == EMPTY_VALUE){
-         _currentValue = NormalizeDouble( lsma_up, _digits);;
-         return TREND_LONG;
+   ~CLaguerre(){
+      ArrayFree(_values);
+   }
+
+   void Refresh(){
+      double L0 = 0;
+      double L1 = 0;
+      double L2 = 0;
+      double L3 = 0;
+      double L0A = 0;
+      double L1A = 0;
+      double L2A = 0;
+      double L3A = 0;
+      double LRSI = 0;
+      double CU = 0;
+      double CD = 0;
+
+      int i=CountBars-1;
+      while(i>=0)
+      {
+         L0A = L0;
+         L1A = L1;
+         L2A = L2;
+         L3A = L3;
+         L0 = (1 - gamma)*iClose( _symbol, _timeFrame, i ) + gamma*L0A;
+         L1 = - gamma *L0 + L0A + gamma *L1A;
+         L2 = - gamma *L1 + L1A + gamma *L2A;
+         L3 = - gamma *L2 + L2A + gamma *L3A;
+
+         CU = 0;
+         CD = 0;
+         
+         if (L0 >= L1) CU = L0 - L1; else CD = L1 - L0;
+         if (L1 >= L2) CU = CU + L1 - L2; else CD = CD + L2 - L1;
+         if (L2 >= L3) CU = CU + L2 - L3; else CD = CD + L3 - L2;
+
+         if (CU + CD != 0) LRSI = CU / (CU + CD);
+         _values[i] = LRSI;
+         i--;
       }
-      return TREND_NONE;
+   }
+
+   double GetValue(int index){
+      return _values[index];
    }
    
-   double GetLSMAValue(int shift=1){
-      return NormalizeDouble(
-         iCustom(_symbol,_timeFrame,LSMA_NAME,lsma_period,500,0,shift)
-         ,_digits);
-   }
-   
-   int GetTrendStartBarShift(int shift=1){
-      if(_currentTrend == TREND_NONE){
-         _currentTrend = GetCurrentTrend(shift);
-      }
-      double tempValue = EMPTY_VALUE;
-      for(int i = shift+1; i < shift + 100; i++){
-         if(_currentTrend==TREND_LONG){
-            // down value
-            tempValue = iCustom(_symbol,_timeFrame,LSMA_NAME,lsma_period,500,2,i);
-            if(tempValue != EMPTY_VALUE){
-               return i-1;
-            }
-         }else if(_currentTrend==TREND_SHORT){
-            // up value
-            tempValue = iCustom(_symbol,_timeFrame,LSMA_NAME,lsma_period,500,1,i);
-            if(tempValue != EMPTY_VALUE){
-               return i-1;
-            }
-         }
-      }
-      return -1;
-   }
 };
+
+
+
+
+
+
+
+   
+
+   
