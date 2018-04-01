@@ -353,3 +353,19 @@ void OnStart()
 https://www.mql5.com/en/forum/223832
 
 https://www.mql5.com/en/articles/53
+
+
+#define ha 20   // Make this number at least 5 more than the number of candles you plan on analyzing
+struct heikenAshi {
+   double haClose;
+   double haOpen;
+   double haHigh;
+   double haLow;
+   heikenAshi() {
+	haClose = 0.0;haOpen = 0.0;haHigh = 0.0;haLow = 0.0;
+   }
+}; 
+
+heikenAshi haCandles[ha];  // Array of 'ha' Heiken Ashi candles with corresponding properties
+
+https://www.mql5.com/en/forum/159612

@@ -1,5 +1,5 @@
 
-extern int   	timeFrame     = PERIOD_H4;
+//extern int   	timeFrame     = PERIOD_H4;
 extern int   	fast_period   = 12;
 extern int   	slow_period   = 24;
 extern int      signal_period = 9;
@@ -13,6 +13,20 @@ enum STATUS{
 
 string BbMacd_Name = "PakuAK_Marblez";
 
+struct bbMacdData{
+   double upperBand;
+   double lowerBand;
+   double value;
+   bool   isUp;
+   STATUS trend;
+   bbMacdData(){
+      upperBand=0.0;
+      lowerBand=0.0;
+      value=0.0;
+      isUp=false;
+      trend=RANG;
+   }
+};
 
 class CBbMacd {
 
@@ -35,7 +49,7 @@ public:
 	
 	// Default Constructor
 	// Using the external input parameter to construct the object
-	CBbMacd(string symbol) : _symbol(symbol),
+	CBbMacd(string symbol, int timeFrame=PERIOD_H4) : _symbol(symbol),
 				_timeFrame(timeFrame),
 				_fastPeriod(fast_period),
 				_slowPeriod(slow_period),
@@ -64,7 +78,7 @@ public:
 		_isUp=false;
 	}
 
-	void Refersh(int shift){
+	bbMacdData Refersh(int shift){
 		double curUp= iCustom( _symbol, _timeFrame, BbMacd_Name, _fastPeriod,_slowPeriod,_signalPeriod
 							,_std, 0, shift);
 	    double curDown = iCustom( _symbol, _timeFrame, BbMacd_Name, _fastPeriod,_slowPeriod,_signalPeriod
@@ -89,6 +103,14 @@ public:
 		} else {
 			_status = RANG;
 		}
+		
+		bbMacdData bbMacd;
+		bbMacd.upperBand =                      _upperBand;
+      bbMacd.lowerBand =                  	 _lowerBand;
+      bbMacd.value     =                  	 _mainValue;
+      bbMacd.trend     =                  	 _status;
+      bbMacd.isUp      =                  	 _isUp;
+      return bbMacd;
 	}
 
 	STATUS Trend(int index){
@@ -101,6 +123,60 @@ public:
 
 	double MainValue(int index){
 		return _mainValue;
+	}
+	
+	int GetBreakUpperBandIndex(int barStart){
+	   double curUp=0.0,curDown=0.0,uperBand=0.0,lowerBand=0.0,mainValue= 0.0;
+	   for(int i=barStart+1; i< 30; i++){
+	      curUp= iCustom( _symbol, _timeFrame, BbMacd_Name, _fastPeriod,_slowPeriod,_signalPeriod
+							,_std, 0, i);
+   	   curDown = iCustom( _symbol, _timeFrame, BbMacd_Name, _fastPeriod,_slowPeriod,_signalPeriod
+   							,_std, 1, i);
+   	   uperBand = iCustom( _symbol, _timeFrame, BbMacd_Name, _fastPeriod,_slowPeriod,_signalPeriod
+   							,_std, 2, i);
+   	   lowerBand = iCustom( _symbol, _timeFrame, BbMacd_Name, _fastPeriod,_slowPeriod,_signalPeriod
+   							,_std, 3, i);
+         mainValue= 0.0;
+   	   if(curUp==EMPTY_VALUE){
+   	    	mainValue = curDown;
+   	    	//_isUp=false;
+       	} else {
+       		mainValue = curUp;
+       		//_isUp=true;
+       	}
+   
+       	if(mainValue < uperBand){
+       	   return i;
+   		} 
+	   }
+	   return 999;
+	}
+	
+	int GetBreakLowerBandIndex(int barStart){
+	   double curUp=0.0,curDown=0.0,uperBand=0.0,lowerBand=0.0,mainValue= 0.0;
+	   for(int i=barStart+1; i< 30; i++){
+	      curUp= iCustom( _symbol, _timeFrame, BbMacd_Name, _fastPeriod,_slowPeriod,_signalPeriod
+							,_std, 0, i);
+   	   curDown = iCustom( _symbol, _timeFrame, BbMacd_Name, _fastPeriod,_slowPeriod,_signalPeriod
+   							,_std, 1, i);
+   	   uperBand = iCustom( _symbol, _timeFrame, BbMacd_Name, _fastPeriod,_slowPeriod,_signalPeriod
+   							,_std, 2, i);
+   	   lowerBand = iCustom( _symbol, _timeFrame, BbMacd_Name, _fastPeriod,_slowPeriod,_signalPeriod
+   							,_std, 3, i);
+         mainValue= 0.0;
+   	   if(curUp==EMPTY_VALUE){
+   	    	mainValue = curDown;
+   	    	//_isUp=false;
+       	} else {
+       		mainValue = curUp;
+       		//_isUp=true;
+       	}
+   
+       	if(mainValue > lowerBand){
+       	   return i;
+   		} 
+      }
+	   return 999;
 	}
 	
 

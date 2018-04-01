@@ -22,6 +22,7 @@ private:
    int              _timeFrame;
    int              _digits;
    double           _values[];
+   bool             _refreshed;
    
 public:
 
@@ -29,6 +30,8 @@ public:
                _symbol(symbol),
                _timeFrame(timeframe){
       _digits = (int)MarketInfo(_symbol,MODE_DIGITS);
+      ArrayResize(_values , CountBars+5, 0);
+      _refreshed = false;
    }
    
    ~CLaguerre(){
@@ -71,12 +74,26 @@ public:
          _values[i] = LRSI;
          i--;
       }
+      _refreshed = true;
    }
 
    double GetValue(int index){
+      if(!_refreshed)
+         Refresh();
       return _values[index];
    }
    
+   void DataArray(double & value[], int barStart, int count){
+      if(!_refreshed)
+         Refresh();
+      
+      ArrayResize(value,count);
+      for(int i=barStart,j=0;i<barStart+count;i++){
+         value[j] = _values[i];
+         j++;
+      }
+
+   }
 };
 
 

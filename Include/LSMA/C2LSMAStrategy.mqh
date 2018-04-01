@@ -13,7 +13,7 @@ extern    bool    UseCurrent = false;
 #include <CZigZag.mqh>
 
 
-class CLSMAStrategy : public IStrategy{
+class C2LSMAStrategy : public IStrategy{
 
 private :
 	int                  _indicatorCount;
@@ -26,7 +26,7 @@ private :
     int                 _index;
 
 public :
-	CLSMAStrategy(string symbol){
+	C2LSMAStrategy(string symbol){
 		_symbol = symbol;
 		if(_symbol==NULL) _symbol = Symbol();
 		_lsmaTrend      = new CLSMA(_symbol,Lsma_TF_Middle);
@@ -51,7 +51,7 @@ public :
       if(UseCurrent) _index = 0;
       else _index = 1;
 	}
-	~CLSMAStrategy(){
+	~C2LSMAStrategy(){
 		delete _zigZag;
 	   delete _signal;
 	   delete _lsmaTrend;
@@ -69,7 +69,7 @@ public :
       //Print("LSMA_TREND--->"+trend);
       LSMA_TREND entry = _lsmaEntry.GetCurrentTrend(_index);
       int entryBar = _lsmaEntry.GetTrendStartBarShift(_index);
-      /*
+      
       if(_symbol=="USDJPY"){
          Print("_index--->"+_index);
          Print("LSMA_TREND--->"+trend);
@@ -77,7 +77,7 @@ public :
          
          Print("entry--->"+entry);
          Print("entryBar barShift--->"+entryBar);
-      }*/
+      }
       
       int index = 0;
       _indicators[index].IsValid = true;
@@ -99,7 +99,7 @@ public :
             _indicators[index].IsValid = true;
             index++;
          }
-      }
+      }      
       
       return _signal;
 	}
