@@ -164,12 +164,12 @@ public :
       _laguerre.DataArray(lagu,_index,5);
       //if(_symbol=="AUDCHF")
       //Print(_symbol+"laguerre---->"+ lagu[0] + ", "+ lagu[1] + ", "+ lagu[2] + ", "+ lagu[3]);
-      if(lagu[0]<0.5 && lagu[0]>0.15 && lagu[0]>lagu[1]){
+      if(lagu[0]>0.15 && lagu[0]>lagu[1] && FindFirstValueIndex(lagu,0.15,false)<4){
          if(_signal.IsBuy){
             _indicators[index].IsValid = true;
             //index++;
          }
-      }else if(lagu[0]>0.5 && lagu[0]<0.85 && lagu[0]<lagu[1]){
+      }else if(lagu[0]<0.85 && lagu[0]<lagu[1] && FindFirstValueIndex(lagu,0.85,true)<4){
          if(_signal.IsSell){
             _indicators[index].IsValid = true;
             //index++;
@@ -227,5 +227,20 @@ public :
             }
         }
         return 0;
+    }
+
+    int FindFirstValueIndex(double & values[], double value, bool bigger = false){
+      int size = ArraySize( values );
+      for(int i=0; i<size; i++){
+        if(bigger){
+          if(values[i] > value){
+            return i;
+          }
+        } else {
+          if(values[i] < value){
+            return i;
+          }
+        }
+      }
     }
 };
