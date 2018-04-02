@@ -111,7 +111,7 @@ void SetupPanel()
    _labelTotalLotsTraded    = new CLabelKeyValue("Total lots traded",150);
    _labelAverageLotsPerTrade= new CLabelKeyValue("Average lots/trade",150);
 
-   _labelTitle.Text="--- ROI System EA v"+version+" --- ";
+   _labelTitle.Text="---HeiKen Ma Channal System EA v"+version+" --- ";
    _labelTitle.FontSize = 10;   
    _line1.X = 0;
    _line1.Width = 380;
@@ -392,7 +392,7 @@ void UpdateTradeHistoryPanel()
 //--------------------------------------------------------------------
 int OnInit()
 {
-   Print("--- Simple Daily Trend Reversal ",version," --- ");
+   Print("--- HenKen MaCannal Break ",version," --- ");
    
    ObjectsDeleteAll();
    Clear();
