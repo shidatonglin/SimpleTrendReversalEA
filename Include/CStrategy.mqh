@@ -30,8 +30,8 @@ public:
    bool   IsBuy;
    bool   IsSell;
    double StopLoss;
-   bool   Exit_Buy;
-   bool   Exit_Sell;
+   bool   ExitBuy;
+   bool   ExitSell;
    
    //--------------------------------------------------------------------
    void Reset()
