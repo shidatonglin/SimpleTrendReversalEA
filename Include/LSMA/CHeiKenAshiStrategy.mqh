@@ -112,7 +112,7 @@ public :
         ){
          _signal.IsBuy = true;
          _indicators[index].IsValid = true;
-            index++;
+         //index++;
       }else
       if(
          (
@@ -127,47 +127,52 @@ public :
         ){
          _signal.IsSell = true;
          _indicators[index].IsValid = true;
-         index++;
+         //index++;
       }
       // 2. bb macd value break out the upper band for buy
       //                            the lower band for sell
-      
+      index++;
       bbMacdData curbbMacd = _bbMacd.Refersh(_index);
-      //if(curbbMacd.isUp)
-         //Print(_symbol + "break upper band index ---->"+ _bbMacd.GetBreakUpperBandIndex(_index));
-      //else
-         //Print(_symbol + "break lower band index ---->"+_bbMacd.GetBreakLowerBandIndex(_index));
-      if(curbbMacd.isUp && curbbMacd.trend==UP 
+      //Print("current symbol---->"+_symbol);
+      /*
+      if(_symbol=="CADCHF"){
+         if(curbbMacd.isUp)
+            Print(_symbol + "break upper band index ---->");
+         else
+            Print(_symbol + "break lower band index ---->"+_bbMacd.GetBreakLowerBandIndex(_index));
+      }*/
+      if(curbbMacd.isUp && (curbbMacd.trend==UP) 
          && (_bbMacd.GetBreakUpperBandIndex(_index)<entryBarShiftAllowed)
       ){
          if(_signal.IsBuy){
             _indicators[index].IsValid = true;
-            index++;
+            //index++;
          }
-      }else if(!curbbMacd.isUp && curbbMacd.trend==DOWN 
+      }else if(!curbbMacd.isUp && (curbbMacd.trend==DOWN) 
             && (_bbMacd.GetBreakLowerBandIndex(_index)<entryBarShiftAllowed)
       ){
          if(_signal.IsSell){
             _indicators[index].IsValid = true;
-            index++;
+            //index++;
          }
       }
       
       // 3. Laguerre value should below 0.5 for buy and within 3 bars, the value get 0
       //                          upper 0.5 for sell and within 3 bars, the value get 1
-      
+      index++;
       double lagu[];
       _laguerre.DataArray(lagu,_index,5);
-      //Print(_symbol+"laguerre---->"+ lagu[0] + "-"+ lagu[1] + "-"+ lagu[2] + "-"+ lagu[3] + "-");
+      //if(_symbol=="AUDCHF")
+      //Print(_symbol+"laguerre---->"+ lagu[0] + ", "+ lagu[1] + ", "+ lagu[2] + ", "+ lagu[3]);
       if(lagu[0]<0.5 && lagu[0]>0.15 && lagu[0]>lagu[1]){
          if(_signal.IsBuy){
             _indicators[index].IsValid = true;
-            index++;
+            //index++;
          }
-      }else if(lagu[0]>0.5 && lagu[0]<0.99 && lagu[0]<lagu[1]){
+      }else if(lagu[0]>0.5 && lagu[0]<0.85 && lagu[0]<lagu[1]){
          if(_signal.IsSell){
             _indicators[index].IsValid = true;
-            index++;
+            //index++;
          }
       }
       
