@@ -242,6 +242,13 @@ public:
       _allowedToTradeNews       = _newsFilter.GetNews(_symbol, news, _impact);  
       _allowedToTradeTimeFilter = _timeFilter.CanTrade();
       
+      if(_signal.ExitBuy){
+         _orders.CloseOrderByType(OP_BUY);
+      }
+
+      if(_signal.ExitSell){
+         _orders.CloseOrderByType(OP_SELL);
+      }
       if ( !_signal.IsBuy && !_signal.IsSell ) return;
       if ( SignalCount() != GetMaxSignalCount() ) return;
       SendAlerts();

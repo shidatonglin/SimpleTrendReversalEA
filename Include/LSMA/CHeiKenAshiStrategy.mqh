@@ -112,6 +112,7 @@ public :
         ){
          _signal.IsBuy = true;
          _indicators[index].IsValid = true;
+         _signal.ExitSell = true;
          //index++;
       }else
       if(
@@ -127,6 +128,7 @@ public :
         ){
          _signal.IsSell = true;
          _indicators[index].IsValid = true;
+         _signal.ExitBuy = true;
          //index++;
       }
       // 2. bb macd value break out the upper band for buy
@@ -148,6 +150,7 @@ public :
             _indicators[index].IsValid = true;
             //index++;
          }
+         _signal.ExitSell = true;
       }else if(!curbbMacd.isUp && (curbbMacd.trend==DOWN) 
             && (_bbMacd.GetBreakLowerBandIndex(_index)<entryBarShiftAllowed)
       ){
@@ -155,6 +158,7 @@ public :
             _indicators[index].IsValid = true;
             //index++;
          }
+         _signal.ExitBuy = true;
       }
       
       // 3. Laguerre value should below 0.5 for buy and within 3 bars, the value get 0
@@ -174,6 +178,14 @@ public :
             _indicators[index].IsValid = true;
             //index++;
          }
+      }
+
+      if(lagu[0]>0.15 && lagu[1] < 0.15){
+        _signal.ExitSell = true;
+      }
+
+      if(lagu[0]<0.85 && lagu[1] > 0.85){
+        _signal.ExitBuy = true;
       }
       
       return _signal;
