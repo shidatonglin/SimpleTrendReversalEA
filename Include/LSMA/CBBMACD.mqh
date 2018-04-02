@@ -146,7 +146,7 @@ public:
        	}
    
        	if(mainValue < uperBand){
-       	   return i;
+       	   return i-1;
    		} 
 	   }
 	   return 999;
@@ -173,7 +173,7 @@ public:
        	}
    
        	if(mainValue > lowerBand){
-       	   return i;
+       	   return i-1;
    		} 
       }
 	   return 999;
