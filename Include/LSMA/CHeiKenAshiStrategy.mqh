@@ -16,6 +16,7 @@ extern    int     TimeFrame = PERIOD_H4;
 #include <LSMA\CBBMACD.mqh>
 #include <LSMA\CLaguerre.mqh>
 #include <LSMA\CMaChannal.mqh>
+#include <LSMA\CMajorTrend.mqh>
 
 #include <CZigZag.mqh>
 
@@ -35,6 +36,7 @@ private :
     CBbMacd*            _bbMacd;
     CMaChannal*         _maChannal;
     CLaguerre*          _laguerre;
+    CMajorTrend*        _majorTrend;
 
 public :
 	CHeiKenAshiStrategy(string symbol){
@@ -48,6 +50,8 @@ public :
 		_bbMacd         = new CBbMacd(_symbol, TimeFrame);
 		_maChannal      = new CMaChannal(_symbol, TimeFrame);
 		_laguerre       = new CLaguerre(_symbol, TimeFrame);
+    _majorTrend     = new CMajorTrend(_symbol, TimeFrame);
+
 		_indicatorCount = 0;
 		ArrayResize( _indicators, 10 );
 		
@@ -62,6 +66,9 @@ public :
       
       _indicators[_indicatorCount] = new CIndicator("Lagu");
       _indicatorCount++;
+
+      _indicators[_indicatorCount] = new CIndicator("MajorTrend");
+      _indicatorCount++;      
         
       if (UseZigZag) {
          _indicators[_indicatorCount] = new CIndicator("ZigZagPercentual");
@@ -79,6 +86,7 @@ public :
       delete       _bbMacd;
       delete       _maChannal;
       delete       _laguerre;
+      delete       _majorTrend;
 		for (int i=0; i < _indicatorCount;++i){
     	    delete _indicators[i];
         }
@@ -193,6 +201,17 @@ public :
 
       if(lagu[0]<0.85 && lagu[1] > 0.85){
         _signal.ExitBuy = true;
+      }
+
+      // 4. Major Trend Check
+      index++;
+      int majorTrend = _majorTrend.GetMajorTrend();
+      if(_signal.IsBuy && majorTrend == 1){
+        _indicators[index].IsValid = true;
+      }
+
+      if(_signal.IsSell && majorTrend == -1){
+        _indicators[index].IsValid = true;
       }
       
       return _signal;
