@@ -84,9 +84,9 @@ protected:
       ArrayResize(lda_116, gi_76);
       ArrayResize(lda_120, gi_76);
       for (int li_124 = 0; li_124 < gi_76; li_124++) {
-         l_high_100 = High[iHighest(_symbol, _timeFrame, MODE_HIGH, li_108, li_124)];
-         l_low_92 = Low[iLowest(_symbol, _timeFrame, MODE_LOW, li_108, li_124)];
-         ld_32 = (High[li_124] + Low[li_124]) / 2.0;
+         l_high_100 = iHigh( _symbol, _timeFrame, iHighest(_symbol, _timeFrame, MODE_HIGH, li_108, li_124));
+         l_low_92 = iLow( _symbol, _timeFrame, iLowest(_symbol, _timeFrame, MODE_LOW, li_108, li_124));
+         ld_32 = (iHigh( _symbol, _timeFrame, li_124) + iLow( _symbol, _timeFrame,li_124)) / 2.0;
          if (l_high_100 - l_low_92 == 0.0) ld_44 = 0.67 * ld_52 + (-0.33);
          else ld_44 = 0.66 * ((ld_32 - l_low_92) / (l_high_100 - l_low_92) - 0.5) + 0.67 * ld_52;
          ld_44 = MathMin(MathMax(ld_44, -0.999), 0.999);
@@ -134,8 +134,8 @@ protected:
       ArrayResize(lda_52, gi_76);
       ArrayResize(lda_56, gi_76);
       for (int li_8 = gi_76 - li_16; li_8 >= 0; li_8--) {
-         ld_28 = High[iHighest(_symbol, _timeFrame, MODE_HIGH, li_16, li_8 - li_16 + 1)];
-         ld_36 = Low[iLowest(_symbol, _timeFrame, MODE_LOW, li_16, li_8 - li_16 + 1)];
+         ld_28 = iHigh( _symbol, _timeFrame, iHighest(_symbol, _timeFrame, MODE_HIGH, li_16, li_8 - li_16 + 1));
+         ld_36 = iLow( _symbol, _timeFrame,iLowest(_symbol, _timeFrame, MODE_LOW, li_16, li_8 - li_16 + 1));
          ld_44 = ld_28 - (ld_28 - ld_36) * ld_20 / 100.0;
          lda_52[li_8 - li_16 + 6] = ld_44;
          lda_56[li_8 - li_16 - 1] = ld_44;
