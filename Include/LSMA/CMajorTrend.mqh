@@ -8,11 +8,12 @@
 #property strict
 
 //---- input parameters
-extern double gamma=0.7;
-extern int CountBars=950;
+//extern double gamma=0.7;
+//extern int CountBars=950;
 
-static string LAGUERRE_NAME = "Laguerre";
+//static string LAGUERRE_NAME = "Laguerre";
    
+int gi_76 = 100;
 
 class CMajorTrend{
 
@@ -137,8 +138,12 @@ protected:
          ld_28 = iHigh( _symbol, _timeFrame, iHighest(_symbol, _timeFrame, MODE_HIGH, li_16, li_8 - li_16 + 1));
          ld_36 = iLow( _symbol, _timeFrame,iLowest(_symbol, _timeFrame, MODE_LOW, li_16, li_8 - li_16 + 1));
          ld_44 = ld_28 - (ld_28 - ld_36) * ld_20 / 100.0;
+         if(li_8 - li_16 + 6>=0)
          lda_52[li_8 - li_16 + 6] = ld_44;
+         //Print("---->"+(li_8 - li_16 - 1));
+         if(li_8 - li_16 - 1 >= 0)
          lda_56[li_8 - li_16 - 1] = ld_44;
+         //if(li_8 - li_16 - 1 == 0) break;
       }
       if (lda_52[0] > lda_56[0]) {
          ai_0 = 1;

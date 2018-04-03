@@ -67,7 +67,7 @@ public :
       _indicators[_indicatorCount] = new CIndicator("Lagu");
       _indicatorCount++;
 
-      _indicators[_indicatorCount] = new CIndicator("MajorTrend");
+      _indicators[_indicatorCount] = new CIndicator("Trend");
       _indicatorCount++;      
         
       if (UseZigZag) {
@@ -180,9 +180,12 @@ public :
       //                          upper 0.5 for sell and within 3 bars, the value get 1
       index++;
       double lagu[];
-      _laguerre.DataArray(lagu,_index,5);
+      _laguerre.DataArray(lagu,_index,50);
       //if(_symbol=="AUDCHF")
       //Print(_symbol+"laguerre---->"+ lagu[0] + ", "+ lagu[1] + ", "+ lagu[2] + ", "+ lagu[3]);
+      //if(_symbol=="GBPCHF"){
+         //Print("lagu--->"+FindFirstValueIndex(lagu,0.15,false));
+      //}
       if(lagu[0]>0.15 && lagu[0]>lagu[1] && FindFirstValueIndex(lagu,0.15,false)<4){
          if(_signal.IsBuy){
             _indicators[index].IsValid = true;
@@ -206,6 +209,7 @@ public :
       // 4. Major Trend Check
       index++;
       int majorTrend = _majorTrend.GetMajorTrend();
+
       if(_signal.IsBuy && majorTrend == 1){
         _indicators[index].IsValid = true;
       }
@@ -280,6 +284,6 @@ public :
           }
         }
       }
-      return -1;
+      return 999;
     }
 };
