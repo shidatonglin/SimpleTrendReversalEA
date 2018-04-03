@@ -163,7 +163,7 @@ public:
       }
       string pretxt_40 = _SavedChartsFolder + Symbol() + "_" + PeriodDesc(Period()) + "_" + _SubFolder
          +"_" + DateTimeReformat(TimeToStr(TimeCurrent(), TIME_DATE|TIME_MINUTES|TIME_SECONDS));
-      WindowScreenShot(pretxt_40 + ".png",1028, 768, 0, -1, -1); // * careful with file type
+      WindowScreenShot(pretxt_40 + ".png",1280, 800, 0, -1, -1); // * careful with file type
       //PlaySound ("shutter.wav");            
    }
 };

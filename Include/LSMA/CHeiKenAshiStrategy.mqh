@@ -7,6 +7,7 @@ extern    int     Lsma_TF_Middle = PERIOD_H4;
 extern    int     entryBarShiftAllowed = 3;
 extern    bool    UseZigZag  = false;
 extern    bool    UseCurrent = false;
+extern    bool    UseLagu    = true;
 
 extern    int     TimeFrame = PERIOD_H4;
 
@@ -64,8 +65,10 @@ public :
       _indicators[_indicatorCount] = new CIndicator("bbMacd");
       _indicatorCount++;
       
-      _indicators[_indicatorCount] = new CIndicator("Lagu");
-      _indicatorCount++;
+      if(UseLagu){
+         _indicators[_indicatorCount] = new CIndicator("Lagu");
+         _indicatorCount++;
+      }
 
       _indicators[_indicatorCount] = new CIndicator("Trend");
       _indicatorCount++;      
@@ -178,33 +181,35 @@ public :
       
       // 3. Laguerre value should below 0.5 for buy and within 3 bars, the value get 0
       //                          upper 0.5 for sell and within 3 bars, the value get 1
-      index++;
-      double lagu[];
-      _laguerre.DataArray(lagu,_index,50);
-      //if(_symbol=="AUDCHF")
-      //Print(_symbol+"laguerre---->"+ lagu[0] + ", "+ lagu[1] + ", "+ lagu[2] + ", "+ lagu[3]);
-      //if(_symbol=="GBPCHF"){
-         //Print("lagu--->"+FindFirstValueIndex(lagu,0.15,false));
-      //}
-      if(lagu[0]>0.15 && lagu[0]>lagu[1] && FindFirstValueIndex(lagu,0.15,false)<4){
-         if(_signal.IsBuy){
-            _indicators[index].IsValid = true;
-            //index++;
+      if(UseLagu){
+         index++;
+         double lagu[];
+         _laguerre.DataArray(lagu,_index,50);
+         //if(_symbol=="AUDCHF")
+         //Print(_symbol+"laguerre---->"+ lagu[0] + ", "+ lagu[1] + ", "+ lagu[2] + ", "+ lagu[3]);
+         //if(_symbol=="GBPCHF"){
+            //Print("lagu--->"+FindFirstValueIndex(lagu,0.15,false));
+         //}
+         if(lagu[0]>0.15 && lagu[0]>lagu[1] && FindFirstValueIndex(lagu,0.15,false)<4){
+            if(_signal.IsBuy){
+               _indicators[index].IsValid = true;
+               //index++;
+            }
+         }else if(lagu[0]<0.85 && lagu[0]<lagu[1] && FindFirstValueIndex(lagu,0.85,true)<4){
+            if(_signal.IsSell){
+               _indicators[index].IsValid = true;
+               //index++;
+            }
          }
-      }else if(lagu[0]<0.85 && lagu[0]<lagu[1] && FindFirstValueIndex(lagu,0.85,true)<4){
-         if(_signal.IsSell){
-            _indicators[index].IsValid = true;
-            //index++;
+   
+         if(lagu[0]>0.15 && lagu[1] < 0.15){
+           _signal.ExitSell = true;
          }
-      }
-
-      if(lagu[0]>0.15 && lagu[1] < 0.15){
-        _signal.ExitSell = true;
-      }
-
-      if(lagu[0]<0.85 && lagu[1] > 0.85){
-        _signal.ExitBuy = true;
-      }
+   
+         if(lagu[0]<0.85 && lagu[1] > 0.85){
+           _signal.ExitBuy = true;
+         }
+       }
 
       // 4. Major Trend Check
       index++;
