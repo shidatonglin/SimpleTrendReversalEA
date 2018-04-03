@@ -86,6 +86,13 @@ public :
 	}
 
 	CSignal* Refresh(){
+
+    // clear indicators
+     for (int i=0; i < _indicatorCount;++i)
+     {
+       _indicators[i].IsValid = false;
+     }
+     // Reset Signal
 	   _signal.Reset();
 	   
 	   int index = 0;

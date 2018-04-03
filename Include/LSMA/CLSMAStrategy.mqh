@@ -61,6 +61,11 @@ public :
 	}
 
 	CSignal* Refresh(){
+    // clear indicators
+      for (int i=0; i < _indicatorCount;++i)
+      {
+         _indicators[i].IsValid = false;
+      }
 	   _signal.Reset();
       LSMA_TREND trend = _lsmaTrend.GetCurrentTrend(_index);
       int barShift = _lsmaTrend.GetTrendStartBarShift(_index);
