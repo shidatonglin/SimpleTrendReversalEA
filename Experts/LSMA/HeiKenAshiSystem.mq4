@@ -157,7 +157,13 @@ static int _line=0;
 void OpenChart(string pair) 
 {
    ulong chartId = ChartOpen(pair, Period());
-   ChartApplyTemplate(chartId, ChartTemplate);
+   if(chartId != 0){
+      bool applied = ChartApplyTemplate(chartId, ChartTemplate);
+      if(!applied){
+         Print("Chart Apply Template Error:"+GetLastError());
+      }
+   }
+   
 }
 
 

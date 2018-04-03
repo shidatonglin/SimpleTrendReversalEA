@@ -11,14 +11,14 @@
 
 string version = "1.0";
 extern string      __chartTemplate              = " ------- Chart template ------------";
-extern string      ChartTemplate                = "ROI.tpl";
+extern string      ChartTemplate                = "LSMA.tpl";
 
 #include <CPair.mqh>
 #include <CTrailingStop.mqh>
 #include <CGui.mqh>
 #include <CInfoPanel.mqh>
 #include <CTradesStats.mqh>
-#include <ROI\CROIStrategy.mqh>
+#include <LSMA\C2LSMAStrategy.mqh>
 
 
 CNewsFilter*     _newsFilter;  
@@ -413,7 +413,7 @@ int OnInit()
    
    if (IsTesting() || IsOptimization())
    {
-      _pairs[0]  = new CPair(Symbol(), new CROIStrategy(Symbol()), _newsFilter, _utils);
+      _pairs[0]  = new CPair(Symbol(), new C2LSMAStrategy(Symbol()), _newsFilter, _utils);
       _pairCount = 1;
    }
    else
@@ -427,7 +427,7 @@ int OnInit()
          {
             if (StringFind(symbol, pairs[x]) >= 0 )
             {
-               _pairs[_pairCount] = new CPair(symbol, new CROIStrategy(symbol), _newsFilter, _utils);
+               _pairs[_pairCount] = new CPair(symbol, new C2LSMAStrategy(symbol), _newsFilter, _utils);
                _pairCount++;
                break;
             }
