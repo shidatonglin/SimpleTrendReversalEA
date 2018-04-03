@@ -472,7 +472,6 @@ void OnTick()
 {  
   static int lastMinute = -1;
   static int startLine  = 0;
-  static int lastHour   = -1;
   
   if (_pairCount <= 0)
   {
@@ -499,11 +498,8 @@ void OnTick()
          _pairs[i].Trail();
       } 
    }
-
-   int hour = TimeHour( TimeCurrent() );
-   if(hour != lastHour){
-      _screenshot.TakeScreenShot();
-   }
+   // Take screenshot hourly for analsysing
+   _screenshot.TakeScreenShot();
    
    // update dashboard once per minute
    int min = TimeMinute(TimeCurrent());
