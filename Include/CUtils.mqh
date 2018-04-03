@@ -98,6 +98,68 @@ public:
 };
 
 
+class CScreenshot{
+
+   string _SavedChartsFolder;
+   string _SubFolder;
+
+public:
+   CScreenshot(string subFolder){
+      _SubFolder = subFolder;
+      _SavedChartsFolder = "ScreenShot/";
+   }
+
+   ~CScreenshot(){
+
+   }
+
+
+   string PeriodDesc(int TF_0) {
+      switch (TF_0) {
+      case 1:
+         return ("M1");
+      case 5:
+         return ("M5");
+      case 15:
+         return ("M15");
+      case 30:
+         return ("M30");
+      case 60:
+         return ("H1");
+      case 240:
+         return ("H4");
+      case 1440:
+         return ("D1");
+      case 10080:
+         return ("W1");
+      case 43200:
+         return ("MN");
+      }
+      return ("Unknown TF");
+   }
+   
+   string DateTimeReformat(string dat_0) {
+      string dat_8;
+      string dat_ret_16 = "";
+      dat_0 = " " + dat_0;
+      int dat_len_24 = StringLen(dat_0);
+      for (int dat_28 = 0; dat_28 < dat_len_24; dat_28++) {
+         dat_8 = StringSetChar(dat_8, 0, StringGetChar(dat_0, dat_28));
+         if (dat_8 != ":" && dat_8 != " " && dat_8 != ".") dat_ret_16 = dat_ret_16 + dat_8;
+      }
+      return (dat_ret_16);
+   } 
+   
+ 
+   int TakeScreenShot() {   
+
+      string pretxt_40 = _SavedChartsFolder + Symbol() + "_" + PeriodDesc(Period()) + "_" + _SubFolder
+         +"_" + DateTimeReformat(TimeToStr(TimeCurrent(), TIME_DATE|TIME_MINUTES|TIME_SECONDS));
+      WindowScreenShot(pretxt_40 + ".png",1028, 768, 0, -1, -1); // * careful with file type
+      //PlaySound ("shutter.wav");            
+   }
+};
+
       
 class CUtils
 {

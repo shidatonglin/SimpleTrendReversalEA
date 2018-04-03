@@ -55,6 +55,7 @@ CLabelKeyValue*  _labelTotalLotsTraded;
 CLabelKeyValue*  _labelAverageLotsPerTrade;
 
 CUtils* _utils;
+CScreenshot* _screenshot;
 
 CPair* _pairs[];
 int    _pairCount=0;
@@ -399,6 +400,7 @@ int OnInit()
    _tradeStats   = new CTradeStats(MagicNumberBuy, MagicNumberSell);
    _newsFilter   = new CNewsFilter(); 
    _utils        = new CUtils();
+   _screenshot   = new CScreenshot("HeiKen");
    _line         = 0;
    _pairCount    = 0;
    
@@ -449,6 +451,7 @@ void OnDeinit(const int reason)
 {
    Print("--- Simple Daily Trend Reversal deinit---");
    delete _utils;
+   delete _screenshot;
    delete _tradeStats;
    delete _newsFilter;
    if (_infoPanel!=NULL) delete _infoPanel;
@@ -469,6 +472,7 @@ void OnTick()
 {  
   static int lastMinute = -1;
   static int startLine  = 0;
+  static int lastHour   = -1;
   
   if (_pairCount <= 0)
   {
@@ -494,6 +498,11 @@ void OnTick()
       {
          _pairs[i].Trail();
       } 
+   }
+
+   int hour = TimeHour( TimeCurrent() );
+   if(hour != lastHour){
+      _screenshot.TakeScreenShot();
    }
    
    // update dashboard once per minute
