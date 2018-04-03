@@ -102,11 +102,13 @@ class CScreenshot{
 
    string _SavedChartsFolder;
    string _SubFolder;
+   int    _lastHour;
 
 public:
    CScreenshot(string subFolder){
       _SubFolder = subFolder;
       _SavedChartsFolder = "ScreenShot/";
+      _lastHour = -1;
    }
 
    ~CScreenshot(){
@@ -151,8 +153,14 @@ public:
    } 
    
  
-   int TakeScreenShot() {   
-
+   void TakeScreenShot() {   
+      int hour = TimeHour( TimeCurrent() );
+      if(hour != _lastHour){
+         //_screenshot.TakeScreenShot();
+         _lastHour = hour;
+      }else{
+         return;
+      }
       string pretxt_40 = _SavedChartsFolder + Symbol() + "_" + PeriodDesc(Period()) + "_" + _SubFolder
          +"_" + DateTimeReformat(TimeToStr(TimeCurrent(), TIME_DATE|TIME_MINUTES|TIME_SECONDS));
       WindowScreenShot(pretxt_40 + ".png",1028, 768, 0, -1, -1); // * careful with file type
