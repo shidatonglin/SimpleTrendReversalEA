@@ -112,21 +112,23 @@ public :
       
       //1. Ha is up and cross up ma channal in three bars
       heikenAshi heikenData = _heiken.Refersh(_index);
-      heikenAshi heikenDataPre = _heiken.Refersh(_index+1);
-      heikenAshi heikenDataPre1 = _heiken.Refersh(_index+2);
+      //heikenAshi heikenDataPre = _heiken.Refersh(_index+1);
+      //heikenAshi heikenDataPre1 = _heiken.Refersh(_index+2);
       MaData madata = _maChannal.Refersh(_index);
-      MaData madataPre = _maChannal.Refersh(_index+1);
-      MaData madataPre1 = _maChannal.Refersh(_index+2);
+      //MaData madataPre = _maChannal.Refersh(_index+1);
+      //MaData madataPre1 = _maChannal.Refersh(_index+2);
       if(
          (
             (heikenData.isUp && heikenData.haClose > madata.high)
-            && (heikenDataPre.haClose < madataPre.high)
+              && (GetCrossUpIndex(_index) < 3)
+            //&& (heikenDataPre.haClose < madataPre.high)
          )
-         ||
+         /*||
          (
             (heikenDataPre.isUp && heikenDataPre.haClose > madataPre.high)
             && (heikenDataPre1.haClose < madataPre1.high)
          )
+         */
         ){
          _signal.IsBuy = true;
          _indicators[index].IsValid = true;
@@ -136,13 +138,16 @@ public :
       if(
          (
             (!heikenData.isUp && heikenData.haClose < madata.low)
-            && (heikenDataPre.haClose > madataPre.low)
+              && (GetCrossDownIndex(_index) < 3)
+            //&& (heikenDataPre.haClose > madataPre.low)
          )
+         /*
          ||
          (
             (!heikenDataPre.isUp && heikenDataPre.haClose < madataPre.low)
             && (heikenDataPre1.haClose > madataPre1.low)
          )
+         */
         ){
          _signal.IsSell = true;
          _indicators[index].IsValid = true;
@@ -181,10 +186,12 @@ public :
       
       // 3. Laguerre value should below 0.5 for buy and within 3 bars, the value get 0
       //                          upper 0.5 for sell and within 3 bars, the value get 1
+      
+      double lagu[];
+      _laguerre.DataArray(lagu,_index,50);
       if(UseLagu){
          index++;
-         double lagu[];
-         _laguerre.DataArray(lagu,_index,50);
+         
          //if(_symbol=="AUDCHF")
          //Print(_symbol+"laguerre---->"+ lagu[0] + ", "+ lagu[1] + ", "+ lagu[2] + ", "+ lagu[3]);
          //if(_symbol=="GBPCHF"){
@@ -201,15 +208,14 @@ public :
                //index++;
             }
          }
-   
-         if(lagu[0]>0.15 && lagu[1] < 0.15){
-           _signal.ExitSell = true;
-         }
-   
-         if(lagu[0]<0.85 && lagu[1] > 0.85){
-           _signal.ExitBuy = true;
-         }
-       }
+      }
+      if(lagu[0]>0.15 && lagu[1] < 0.15){
+        _signal.ExitSell = true;
+      }
+
+      if(lagu[0]<0.85 && lagu[1] > 0.85){
+        _signal.ExitBuy = true;
+      }
 
       // 4. Major Trend Check
       index++;
@@ -288,6 +294,28 @@ public :
             return i;
           }
         }
+      }
+      return 999;
+    }
+    
+    int GetCrossUpIndex(int index){
+      for(int i=index+1; i<50;i++){
+         heikenAshi newData = _heiken.Refersh(i);
+         MaData newMa = _maChannal.Refersh(i);
+         if(newData.haClose < newMa.high){
+            return i-1;
+         }
+      }
+      return 999;
+    }
+    
+    int GetCrossDownIndex(int index){
+      for(int i=index+1; i<50;i++){
+         heikenAshi newData = _heiken.Refersh(i);
+         MaData newMa = _maChannal.Refersh(i);
+         if(newData.haClose > newMa.low){
+            return i-1;
+         }
       }
       return 999;
     }
