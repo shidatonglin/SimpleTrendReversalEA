@@ -71,13 +71,6 @@ public:
       _notifyCount = 0;
    }
    
-   ~CNotifyManager(){
-      int total = ArraySize(_notifies);
-      for(int i=0; i<total; i++){
-         delete _notifies[i];
-      }
-   }
-   
    //--------------------------------------------------------------------
    void SendNotify(string symbol, string uniquekey, bool sendEmail,  string text)
    {
@@ -98,95 +91,19 @@ public:
 };
 
 
-class CScreenshot{
-
-   string _SavedChartsFolder;
-   string _SubFolder;
-   int    _lastHour;
-
-public:
-   CScreenshot(string subFolder){
-      _SubFolder = subFolder;
-      _SavedChartsFolder = "ScreenShot/";
-      _lastHour = -1;
-   }
-
-   ~CScreenshot(){
-
-   }
-
-
-   string PeriodDesc(int TF_0) {
-      switch (TF_0) {
-      case 1:
-         return ("M1");
-      case 5:
-         return ("M5");
-      case 15:
-         return ("M15");
-      case 30:
-         return ("M30");
-      case 60:
-         return ("H1");
-      case 240:
-         return ("H4");
-      case 1440:
-         return ("D1");
-      case 10080:
-         return ("W1");
-      case 43200:
-         return ("MN");
-      }
-      return ("Unknown TF");
-   }
-   
-   string DateTimeReformat(string dat_0) {
-      string dat_8;
-      string dat_ret_16 = "";
-      dat_0 = " " + dat_0;
-      int dat_len_24 = StringLen(dat_0);
-      for (int dat_28 = 0; dat_28 < dat_len_24; dat_28++) {
-         dat_8 = StringSetChar(dat_8, 0, StringGetChar(dat_0, dat_28));
-         if (dat_8 != ":" && dat_8 != " " && dat_8 != ".") dat_ret_16 = dat_ret_16 + dat_8;
-      }
-      return (dat_ret_16);
-   } 
-   
- 
-   void TakeScreenShot() {   
-      int hour = TimeHour( TimeCurrent() );
-      if(hour != _lastHour){
-         //_screenshot.TakeScreenShot();
-         _lastHour = hour;
-      }else{
-         return;
-      }
-      string pretxt_40 = _SavedChartsFolder + Symbol() + "_" + PeriodDesc(Period()) + "_" + _SubFolder
-         +"_" + DateTimeReformat(TimeToStr(TimeCurrent(), TIME_DATE|TIME_MINUTES|TIME_SECONDS));
-      WindowScreenShot(pretxt_40 + ".png",1280, 800, 0, -1, -1); // * careful with file type
-      //PlaySound ("shutter.wav");            
-   }
-};
-
       
 class CUtils
 {
 private:
    datetime         _prevTime;
-   double           _pipValue;
    CNotifyManager*  _notifyMgr;
    
 public:
-   double PointValue;
    bool   IsNewBar;
    
    CUtils(void)
    {
       _notifyMgr = new CNotifyManager();
-      _pipValue  = 1;
-      if (Digits ==3 || Digits==5) _pipValue = 10;
-      
-      PointValue = Point() * _pipValue;
    }
    
    ~CUtils()
@@ -223,29 +140,48 @@ public:
    }
    
    
+   double PointValue(string symbol)
+   {
+      double pts    = MarketInfo(symbol, MODE_POINT);
+      double digits = MarketInfo(symbol, MODE_DIGITS);
+      double pipValue  = 1;
+      if (digits ==3 || digits==5) pipValue = 10;
+      return pts * pipValue;
+   }
+   
+   
    //------------------------------------------------------------------------------------
    // Convert pips to price
    //------------------------------------------------------------------------------------
-   double PipsToPrice(double pips)
+   double PipsToPrice(string symbol, double pips)
    {
-      return pips * PointValue;
+      return pips * PointValue(symbol);
    }
    
    //------------------------------------------------------------------------------------
    // Convert price to pips
    //------------------------------------------------------------------------------------
-   double PriceToPips(double points)
+   double PriceToPips(string symbol, double points)
    {
-      return points / PointValue;
+      return points / PointValue(symbol);
    }
    
+   double AskPrice(string symbol)
+   {
+     return MarketInfo(symbol, MODE_ASK);
+   }
+   
+   double BidPrice(string symbol)
+   {
+     return MarketInfo(symbol, MODE_BID);
+   }
 
    //------------------------------------------------------------------------------------
    // return current spread
    //------------------------------------------------------------------------------------
-   double Spread()
+   double Spread(string symbol)
    {
-   	return PriceToPips(Ask - Bid);
+   	 return PriceToPips(symbol, AskPrice(symbol) - BidPrice(symbol) );
    }  
    
    //------------------------------------------------------------------------------------
@@ -264,6 +200,40 @@ public:
    		IsNewBar = false;
    	}
    }
+   
+   //------------------------------------------------------------------------------------
+   double GetLotSize(string symbol)
+   {
+      return  MarketInfo(symbol, MODE_LOTSIZE);
+   }
+   
+   //------------------------------------------------------------------------------------
+   double GetLotStep(string symbol)
+   {
+      return  MarketInfo(symbol, MODE_LOTSTEP);
+   }
+   
+   //------------------------------------------------------------------------------------
+   double RequiredMargin(string symbol)
+   {
+      return MarketInfo(symbol,MODE_MARGINREQUIRED);
+   }
+   
+   //------------------------------------------------------------------------------------
+   double NormalizeLotSize(string symbol, double lotSize)
+   {
+      double   normalizedLotSize = 0.;
+      int      lotSizeDigits = 0; 
+      double   lotSizeStep = GetLotStep(symbol);
+      double   minLots     = MarketInfo(symbol, MODE_MINLOT);
+      
+      lotSizeDigits        = (int)-MathRound( MathLog( lotSizeStep) / MathLog(10.) ); // Number of digits after decimal point for the Lot for the current broker, like Digits for symbol prices
+    
+      double cnt=(lotSize - minLots) / lotSizeStep;
+      cnt=MathRound(cnt);
+      normalizedLotSize    = NormalizeDouble( (cnt * lotSizeStep) + minLots, lotSizeDigits);
+      return normalizedLotSize ;
+   } 
 };
 
-//CUtils* _utils = new CUtils();
+CUtils* _utils = new CUtils();

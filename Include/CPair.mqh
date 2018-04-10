@@ -7,6 +7,8 @@ extern bool        emailAlerts                  = false;
 extern bool        stopLossAtZigZagArrow        = true;
 extern int         minsBetween2TradesOnSamePair = 720;
 extern bool        AllowReEntriesOnSamePair     = false;
+extern int         SignalInvalidAfterHours      = 12;
+extern int         SignalInvalidAfterPips       = 30;
 extern string      TradePairs                   = "EURUSD USDJPY GBPUSD USDCHF USDCAD AUDUSD NZDUSD EURCHF EURGBP EURCAD EURAUD EURNZD EURJPY GBPJPY CHFJPY CADJPY AUDJPY NZDJPY GBPCHF GBPAUD GBPCAD GBPNZD AUDCHF AUDCAD AUDNZD CADCHF NZDCHF NZDCAD";
 
 
@@ -129,6 +131,8 @@ public:
       }
       if ( _allowedToTradeNews && UseNewsFilter )  cnt = cnt + 1;
       if ( _allowedToTradeTimeFilter ) cnt = cnt + 1;
+      if (_signal.Age <= SignalInvalidAfterHours) cnt=cnt + 1;
+      if (_signal.PipsAway <= SignalInvalidAfterPips) cnt=cnt+1;
       return cnt;
    }
    
@@ -138,6 +142,8 @@ public:
       int cnt= _strategy.GetIndicatorCount();
       if (UseNewsFilter) cnt = cnt + 1;
       cnt = cnt + 1; // time filter
+      cnt = cnt + 1; // signal age
+      cnt = cnt + 1; // signal pips from price
       return cnt;
    }
    
@@ -164,6 +170,12 @@ public:
          x += 60;
       }
       DrawText(1, x, "Time",White);
+      x += 60;
+      
+      DrawText(1, x, "Age",White);
+      x += 60;
+
+      DrawText(1, x, "Pips",White);
       x += 60;
       
       DrawText(1, x, "Valid",White);
@@ -193,14 +205,21 @@ public:
       if (UseNewsFilter)
       {
          color newsColor = _allowedToTradeNews ? zigClr : clrGray;
-         DrawRect(line, xpos, newsColor,60 ); xpos+=60;
+         DrawRect(line, xpos, zigClr,60 ); xpos+=60;
       }   
       
       color timeColor = _allowedToTradeTimeFilter ? zigClr : clrGray;
-      DrawRect(line, xpos, timeColor,60 ); xpos+=60;
-         
+      DrawRect(line, xpos, zigClr,60 ); xpos+=60;
+
+      color ageColor = (_signal.Age <= SignalInvalidAfterHours )? zigClr : clrGray;
+      DrawRect(line, xpos, ageColor,60 ); xpos+=60;
+      
+      color pipsColor = (_signal.PipsAway <= SignalInvalidAfterPips )? zigClr : clrGray;
+      DrawRect(line, xpos, pipsColor,60 ); xpos+=60;
+
       color validColor = ( SignalCount() == GetMaxSignalCount() ) ? zigClr : clrGray;
       DrawRect(line, xpos, validColor, 60  );xpos+=60;
+
 
       if (validColor != clrGray)
       {
@@ -242,13 +261,6 @@ public:
       _allowedToTradeNews       = _newsFilter.GetNews(_symbol, news, _impact);  
       _allowedToTradeTimeFilter = _timeFilter.CanTrade();
       
-      if(_signal.ExitBuy){
-         _orders.CloseOrderByType(OP_BUY);
-      }
-
-      if(_signal.ExitSell){
-         _orders.CloseOrderByType(OP_SELL);
-      }
       if ( !_signal.IsBuy && !_signal.IsSell ) return;
       if ( SignalCount() != GetMaxSignalCount() ) return;
       SendAlerts();
@@ -339,40 +351,27 @@ public:
       COrder* order = _orders.GetLastClosedOrder();
       if (order != NULL)
       {
-         // check number of minutes elapsed since this last trade has closed
-         double timeElapsed =(double)(TimeCurrent() - order.CloseTime);
-         timeElapsed /= 60.0;
-         bool lastTradeWasBuyOrder  = order.IsBuy;
-         bool lastTradeWasSellOrder = order.IsSell;
-         delete order;
-         
-         int minsSinceLastTrade = (int)timeElapsed;
-		 
-		 // did enough time pass since last trade ?
-		 if (minsSinceLastTrade < minsBetween2TradesOnSamePair)
-         {
-			// no, then return
-            return;
-         }
+        bool lastTradeWasBuyOrder  = order.IsBuy;
+        bool lastTradeWasSellOrder = order.IsSell;
+        
+        // is this a re-entry
+        if ( (lastTradeWasBuyOrder  && _signal.IsBuy) ||
+             (lastTradeWasSellOrder && _signal.IsSell) )
+             {
+                // yes, then check number of minutes elapsed since this last trade has closed
+                double timeElapsed =(double)(TimeCurrent() - order.CloseTime);
+                timeElapsed /= 60.0;
+                delete order;
 
-		 // enough time passed.
-		 // are we allowed to take re-entries ?
-         if (!AllowReEntriesOnSamePair)
-         {
-		    // no we are not. 
-			// Is this a re-entry ?
-            if (lastTradeWasBuyOrder && _signal.IsBuy)
-            {
-				// yes, then return
-                return;
-            }
+                int minsSinceLastTrade = (int)timeElapsed;
 
-            if (lastTradeWasSellOrder && _signal.IsSell)
-            {
-				// yes, then return
-                return;
+                // did enough time pass since last trade ?
+                if (minsSinceLastTrade < minsBetween2TradesOnSamePair)
+                {
+                    // no, then return
+                    return;
+                }
             }
-         }
       }
       
       // did we reach the max nr of open orders ?
@@ -388,11 +387,9 @@ public:
          // place buy order
          Print(_symbol, " -> place buy order");
          double slZigZag = _signal.StopLoss;
-         double price    = MarketInfo(_symbol, MODE_ASK);
-         double digits   = MarketInfo(_symbol, MODE_DIGITS);
-         double points   = MarketInfo(_symbol, MODE_POINT);
-         double mult     = (digits == 3 || digits == 5) ? 10 : 1;
-         double orderSl  = price - (OrderHiddenSL * mult * points);
+         double price    = _utils.AskPrice(_symbol);
+         
+         double orderSl  = price - _utils.PipsToPrice(_symbol, OrderHiddenSL);
          double sl       = orderSl;
          if (stopLossAtZigZagArrow)
          {
@@ -408,11 +405,8 @@ public:
          // place sell order
          Print(_symbol, " -> place sell order");
          double slZigZag = _signal.StopLoss;
-         double price    = MarketInfo(_symbol, MODE_BID);
-         double digits   = MarketInfo(_symbol, MODE_DIGITS);
-         double points   = MarketInfo(_symbol, MODE_POINT);
-         double mult     = (digits == 3 || digits == 5) ? 10 : 1;
-         double orderSl  = price + (OrderHiddenSL * mult * points);
+         double price    = _utils.BidPrice(_symbol);
+         double orderSl  = price + _utils.PipsToPrice(_symbol, OrderHiddenSL);
          double sl       = orderSl;
          if (stopLossAtZigZagArrow ) 
          {
@@ -440,19 +434,15 @@ void SetStoplossOnOpenOrder()
 		 // check if magic number matches
          if (OrderMagicNumber() == MagicNumberBuy || OrderMagicNumber() == MagicNumberSell)
          {
-		    // check if order is for our symbol
+		        // check if order is for our symbol
             if (OrderSymbol() != _symbol) continue;
             
-		   	// ask strategy for the stoploss for this order
+		   	    // ask strategy for the stoploss for this order
 
             double strategySL = _strategy.GetStopLossForOpenOrder();
-            double points = MarketInfo(_symbol, MODE_POINT);
-            double digits = MarketInfo(_symbol, MODE_DIGITS);
-            double mult   = (digits == 3 || digits == 5) ? 10 : 1;            
-				
             if (OrderType() == OP_BUY)
             {
-               double orderSl  = OrderOpenPrice() - (OrderHiddenSL * mult * points);
+               double orderSl  = OrderOpenPrice() - _utils.PipsToPrice(_symbol, OrderHiddenSL);
                
                if (stopLossAtZigZagArrow  && OrderHiddenSL > 0 && strategySL < orderSl)
                {
@@ -475,7 +465,7 @@ void SetStoplossOnOpenOrder()
             }
             else  if (OrderType() == OP_SELL)
             {
-               double orderSl  = OrderOpenPrice() + (OrderHiddenSL * mult * points);
+               double orderSl  = OrderOpenPrice() + _utils.PipsToPrice(_symbol, OrderHiddenSL);
                if (stopLossAtZigZagArrow && OrderHiddenSL > 0 && strategySL > orderSl)
                {
 				      // set stoploss to OrderHiddenSL
