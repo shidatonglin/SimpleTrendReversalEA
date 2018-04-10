@@ -5,11 +5,13 @@ extern  string    __LSMAStrategySetting = "------Three Screen Strategy Setting--
 extern    int     entryBarShiftAllowed = 3;
 extern    bool    UseZigZag  = false;
 extern    bool    UseCurrent = false;
+extern    bool    UseLagu    = true;
 
-extern    int     TimeFrame = PERIOD_H4;
+extern    int     TimeFrame = PERIOD_H1;
 
 #include <CStrategy.mqh>
 
+#include <LSMA\CLaguerre.mqh>
 #include <CZigZag.mqh>
 
 
@@ -21,6 +23,7 @@ private :
     CSignal*            _signal;
     string              _symbol;
     CZigZag*            _zigZag;
+    CLaguerre*          _laguerre;
     int                 _index;
 
 public :
@@ -29,6 +32,7 @@ public :
 		if(_symbol==NULL) _symbol = Symbol();
 		_signal         = new CSignal();
       _zigZag         = new CZigZag();
+    _laguerre       = new CLaguerre(_symbol, TimeFrame);
 		_indicatorCount = 0;
 		ArrayResize( _indicators, 5 );
 		
@@ -41,7 +45,10 @@ public :
       _indicators[_indicatorCount] = new CIndicator("WPR");
       _indicatorCount++;
       
-      
+      if(UseLagu){
+         _indicators[_indicatorCount] = new CIndicator("Lagu");
+         _indicatorCount++;
+      }
       /*
       _indicators[_indicatorCount] = new CIndicator("Trend");
       _indicatorCount++;      
@@ -55,7 +62,9 @@ public :
       else _index = 1;
 	}
 	~CThreeScreenStrategy(){
-		
+		delete       _laguerre;
+    delete _zigZag;
+    delete _signal;
 		for (int i=0; i < _indicatorCount;++i){
     	    delete _indicators[i];
         }
@@ -105,6 +114,23 @@ public :
       
       if(wpr > -20 && _signal.IsSell){
          _indicators[index].IsValid = true;
+      }
+
+      double lagu[];
+      _laguerre.DataArray(lagu,_index,50);
+      if(UseLagu){
+         index++;
+         if(lagu[0]>0.15 && lagu[1]<0.15){
+            if(_signal.IsBuy){
+               _indicators[index].IsValid = true;
+               //index++;
+            }
+         }else if(lagu[0]<0.85 && lagu[1]>0.85){
+            if(_signal.IsSell){
+               _indicators[index].IsValid = true;
+               //index++;
+            }
+         }
       }
       
       return _signal;
