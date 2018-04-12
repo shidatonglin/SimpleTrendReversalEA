@@ -5,7 +5,8 @@ extern  string    __LSMAStrategySetting = "------Three Screen Strategy Setting--
 extern    int     entryBarShiftAllowed = 3;
 extern    bool    UseZigZag  = false;
 extern    bool    UseCurrent = false;
-extern    bool    UseLagu    = true;
+extern    bool    UseLagu    = false;
+extern    bool    UseWPR     = true;
 
 extern    int     TimeFrame = PERIOD_H1;
 
@@ -42,8 +43,10 @@ public :
       _indicators[_indicatorCount] = new CIndicator("D_MACD");
       _indicatorCount++;
       
-      _indicators[_indicatorCount] = new CIndicator("WPR");
-      _indicatorCount++;
+      if(UseWPR){
+         _indicators[_indicatorCount] = new CIndicator("WPR");
+         _indicatorCount++;
+      }
       
       if(UseLagu){
          _indicators[_indicatorCount] = new CIndicator("Lagu");
@@ -106,17 +109,21 @@ public :
       }
       
       //3. H1 Wpr Signal
-      index++;
-      double wpr = iWPR(_symbol, 60 , 14 , 1);
-      if(wpr < -80 && _signal.IsBuy){
-         _indicators[index].IsValid = true;
-      }
       
-      if(wpr > -20 && _signal.IsSell){
-         _indicators[index].IsValid = true;
+      if(UseWPR){
+         index++;
+         double wpr = iWPR(_symbol, 60 , 14 , 1);
+         if(wpr < -80 && _signal.IsBuy){
+            _indicators[index].IsValid = true;
+         }
+         
+         if(wpr > -20 && _signal.IsSell){
+            _indicators[index].IsValid = true;
+         }
       }
 
       double lagu[];
+      _laguerre.Refresh();
       _laguerre.DataArray(lagu,_index,50);
       if(UseLagu){
          index++;
