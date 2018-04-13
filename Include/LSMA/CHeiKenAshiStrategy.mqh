@@ -191,6 +191,7 @@ public :
       //                          upper 0.5 for sell and within 3 bars, the value get 1
       
       double lagu[];
+      _laguerre.Refresh();
       _laguerre.DataArray(lagu,_index,50);
       if(UseLagu){
          index++;
