@@ -8,6 +8,8 @@ extern    int     entryBarShiftAllowed = 3;
 extern    bool    UseZigZag  = false;
 extern    bool    UseCurrent = false;
 extern    bool    UseLagu    = true;
+extern    bool    UserMacd   = true;
+extern    int     TF_MACD    = PERIOD_D1;
 
 extern    int     TimeFrame = PERIOD_H4;
 
@@ -73,9 +75,11 @@ public :
       _indicators[_indicatorCount] = new CIndicator("Trend");
       _indicatorCount++;
       
-      _indicators[_indicatorCount] = new CIndicator("MACD");
-      _indicatorCount++;        
-        
+      if(UserMacd){
+        _indicators[_indicatorCount] = new CIndicator("MACD");
+        _indicatorCount++;        
+      }
+
       if (UseZigZag) {
          _indicators[_indicatorCount] = new CIndicator("ZigZagPercentual");
          _indicatorCount++;
@@ -233,25 +237,27 @@ public :
         _indicators[index].IsValid = true;
       }
       
-      index++;
-      if(
-         //(iCustom(_symbol, 10080 , "macd_adjustable", 12 , 24 , 9 , 3 , True , True , 0, 1) > 0) 
-          //&& 
-          (iCustom(_symbol, 1440 , "macd_adjustable", 12 , 24 , 9 , 3 , True , True , 0, 1) > 0) 
-        ){
-         if(_signal.IsBuy){
-           _indicators[index].IsValid = true;
-         }
-      }
-      
-      if(
-         //(iCustom(_symbol, 10080 , "macd_adjustable", 12 , 24 , 9 , 3 , True , True , 1, 1) < 0) 
-          //&& 
-          (iCustom(_symbol, 1440 , "macd_adjustable", 12 , 24 , 9 , 3 , True , True , 1, 1) < 0) 
-        ){
-         if(_signal.IsSell){
-           _indicators[index].IsValid = true;
-         }
+      if(UserMacd){
+        index++;
+        if(
+           //(iCustom(_symbol, 10080 , "macd_adjustable", 12 , 24 , 9 , 3 , True , True , 0, 1) > 0) 
+            //&& 
+            (iCustom(_symbol, TF_MACD , "macd_adjustable", 12 , 24 , 9 , 3 , True , True , 0, 1) > 0) 
+          ){
+           if(_signal.IsBuy){
+             _indicators[index].IsValid = true;
+           }
+        }
+        
+        if(
+           //(iCustom(_symbol, 10080 , "macd_adjustable", 12 , 24 , 9 , 3 , True , True , 1, 1) < 0) 
+            //&& 
+            (iCustom(_symbol, TF_MACD , "macd_adjustable", 12 , 24 , 9 , 3 , True , True , 1, 1) < 0) 
+          ){
+           if(_signal.IsSell){
+             _indicators[index].IsValid = true;
+           }
+        }
       }
       
       return _signal;
