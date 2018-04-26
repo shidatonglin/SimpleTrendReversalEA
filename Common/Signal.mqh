@@ -23,39 +23,34 @@ class CSignal{
 
 private:
 
-   ENUM_SIGNAL_TYPE    _signal_type;
-   ENUM_EXIT_SIGNAL    _exit_type;
-   double              _StopLoss;
+   ENUM_SIGNAL_TYPE    m_entry_signal;
+   ENUM_EXIT_SIGNAL    m_exit_signal;
+   double              m_stoploss;
    
 public:
+
+   bool   IsBuy()    { return (m_entry_signal==SIGNAL_BUY)  ;}
+   bool   IsSell()   { return (m_entry_signal==SIGNAL_SELL) ;}
+   double StopLoss() { return (m_stoploss)                  ;}
+   bool   ExitBuy()  { return (m_exit_signal==EXIT_BUY)     ;}
+   bool   ExitSell() { return (m_exit_signal==EXIT_SELL)    ;}
    
-   bool   IsBuy(){ return (_signal_type==SIGNAL_BUY);}
-   bool   IsSell(){ return (_signal_type==SIGNAL_SELL);}
-   double StopLoss(){ return _StopLoss;}
-   bool   ExitBuy(){ return (_exit_type==EXIT_BUY);}
-   bool   ExitSell(){ return (_exit_type==EXIT_SELL);}
-   
-   void buySiganl(){
-      _signal_type = SIGNAL_BUY;
+   // Set Entry Signal
+   void SetEntrySignal(ENUM_SIGNAL_TYPE entrySignal){
+      m_entry_signal = entrySignal;
    }
-   void sellSiganl(){
-      _signal_type = SIGNAL_SELL;
-   }
-   
-   void exitBuy(){
-      _exit_type==EXIT_BUY;
-   }
-   
-   void exitSell(){
-      _exit_type==EXIT_SELL;
+
+   // Set Exit Signal
+   void SetExitSignal(ENUM_EXIT_SIGNAL exitSignal){
+      m_exit_signal = exitSignal;
    }
    
    //--------------------------------------------------------------------
    void Reset()
    {
-      _signal_type = SIGNAL_NONE;
-      _exit_type = EXIT_NONE;
-      _StopLoss = 0;
+      m_entry_signal = SIGNAL_NONE;
+      m_exit_signal = EXIT_NONE;
+      m_stoploss = 0;
       /*
       IsBuy    = false;
       IsSell   = false;

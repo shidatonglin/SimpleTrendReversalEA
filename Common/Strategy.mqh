@@ -75,8 +75,8 @@ public:
          if(m_indicators[i].m_signal.IsSell()) sell++;
       }
       
-      if(buy==m_count) m_signal.buySiganl();
-      if(sell==m_count) m_signal.sellSiganl();
+      if(buy==m_count) m_signal.SetEntrySignal(SIGNAL_BUY);
+      if(sell==m_count) m_signal.SetEntrySignal(SIGNAL_SELL);
       
       //return m_signal;
    }
@@ -93,8 +93,8 @@ public:
          }
       }
       
-      if(buy==total) m_signal.exitBuy();
-      if(sell==total) m_signal.exitSell();
+      if(buy==total) m_signal.SetEntrySignal(SIGNAL_BUY);
+      if(sell==total) m_signal.SetEntrySignal(SIGNAL_SELL);
       
       //return m_signal;
    }

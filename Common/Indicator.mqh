@@ -42,7 +42,7 @@ class CMACD : public CIndicator{
 
    void GetSignal(){
       //m_signal.Reset();
-      m_signal.buySiganl();
+      m_signal.SetEntrySignal(SIGNAL_BUY);
    }
    
 };
@@ -51,7 +51,7 @@ class CRsi : public CIndicator{
 
    void   GetSignal(){
       //m_signal.Reset();
-      m_signal.sellSiganl();
+      m_signal.SetEntrySignal(SIGNAL_SELL);
    }
 };
 
@@ -59,6 +59,6 @@ class CZigZag : public CIndicator{
 
    void   GetSignal(){
       //m_signal.Reset();
-      m_signal.sellSiganl();
+      m_signal.SetEntrySignal(SIGNAL_SELL);
    }
 };
