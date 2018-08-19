@@ -41,7 +41,7 @@ public:
     }
 
     // Risk-based money management using stop loss in points
-    double MoneyManagement(int pStopPoints, string pSymbol=NULL)
+    double getOrderLots(string pSymbol, int pStopPoints)
     {
         double tradeSize;
 
