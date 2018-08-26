@@ -117,6 +117,7 @@ int BreakSignal::GetBuySignal(int maxBarShift, int shift = 1){
     bool laguCross = false;
     double laguSignal = GetLaguMain(m_gamma_small,shift);
     double laguMain   = GetLaguMain(m_gamma_big,shift);
+    //Print("shift-->",shift);
     //Print("laguSignal-->",laguSignal);
     //Print("laguMain-->",laguMain);
     if(laguSignal > laguMain
@@ -141,10 +142,13 @@ int BreakSignal::GetBuySignal(int maxBarShift, int shift = 1){
 int BreakSignal::GetSellSignal(int maxBarShift, int shift = 1){
     // For Sell signal
     bool barColorChange = false;
-    int lastChangeBar = GetLastBearishBar(shift);
+    int lastChangeBar = GetLastBullishBar(shift);
+    //Print("lastChangeBar-->",lastChangeBar);
+    //Print("GetHaClose(shift)-->",GetHaClose(shift));
+    //Print("GetHaOpen(shift)-->",GetHaOpen(shift));
     if(GetHaClose(shift) < GetHaOpen(shift)   // Buy Bar
         && lastChangeBar != -1               //
-        && lastChangeBar >= maxBarShift
+        && lastChangeBar <= (maxBarShift + shift)
     ){
         barColorChange = true;
     }
@@ -152,20 +156,32 @@ int BreakSignal::GetSellSignal(int maxBarShift, int shift = 1){
     bool maCrossed = false;
     //double maValue = iMA(m_symbol, m_timeframe, 5, 2, MODE_EMA,PRICE_CLOSE,shift);
     double maValue = GetMaValue(shift);
+    //Print("maValue-->",maValue);
+    //Print("GetHaClose(shift)-->",GetHaClose(shift));
+    //Print("GetLastBarUpMA(shift)-->",GetLastBarUpMA(shift));
     if(GetHaClose(shift) < maValue
-        && GetLastBarBelowMA(shift) != -1
-        && GetLastBarBelowMA(shift) >= maxBarShift){
+        && GetLastBarUpMA(shift) != -1
+        && GetLastBarUpMA(shift) <= (maxBarShift + shift)){
         maCrossed = true;
     }
 
     bool laguCross = false;
     double laguSignal = GetLaguMain(m_gamma_small,shift);
     double laguMain   = GetLaguMain(m_gamma_big,shift);
+    //Print("laguSignal-->",laguSignal);
+    //Print("laguMain-->",laguMain);
+    //Print("GetLastCrossBarIndex(-1,shift)-->",GetLastCrossBarIndex(-1,shift));
     if(laguSignal < laguMain
         && GetLastCrossBarIndex(-1,shift) != -1
-        && GetLastCrossBarIndex(-1,shift) < maxBarShift){
+        && GetLastCrossBarIndex(-1,shift) <= (maxBarShift + shift)){
         laguCross = true;
     }
+
+    //Print("barColorChange-->",barColorChange);
+
+    //Print("maCrossed-->",maCrossed);
+
+    //Print("laguCross-->",laguCross);
 
     if(barColorChange && maCrossed && laguCross){
         return 1;
@@ -237,7 +253,7 @@ int BreakSignal::GetLastCrossBarIndex(int direction, int start = 1){
 
 double BreakSignal::GetLaguMain(double gamma,int shift=1){
    return NormalizeDouble(iCustom(m_symbol, m_timeframe, "Laguerre-ACS1",
-                                 gamma,100,2, 0, shift),2);
+                                 gamma,500,2, 0, shift),2);
 }
 
 
