@@ -2,7 +2,12 @@
 #include <BreakSignal.mqh>
 
 string pairs[] = {"EURUSD","USDJPY","GBPUSD","AUDUSD","NZDUSD","USDCAD","USDCHF"
-                ,"EURJPY","AUDJPY","GBPJPY","NZDJPY","CADJPY"};
+                ,"EURJPY","AUDJPY","GBPJPY","NZDJPY","CADJPY","AUDCAD","AUDNZD"
+                ,"EURCAD","EURAUD","NZDCAD"
+                ,"Gold"
+                ,"JP225Cash","HK50Cash","CHI50Cash"
+                ,"EU50Cash","FRA40Cash","GER30Cash","UK100Cash"
+                ,"US100Cash","US30Cash","US500Cash"};
 
 
 
