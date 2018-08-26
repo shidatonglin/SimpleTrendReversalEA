@@ -37,10 +37,14 @@ private:
    double  m_gamma_big;
 
 public:
-   BreakSignal();
+   BreakSignal(void);
+   BreakSignal(string, int);
    ~BreakSignal();
-   bool   Init(string);
+   bool   Init(string, int);
+   void   InitLagu(double, double);
 //   bool   InitMa(int,int);
+   string Symbol();
+   void   Symbol(string symbol);
    double GetHaOpen(int);
    double GetHaClose(int);
    int    GetBuySignal(int, int);
@@ -53,6 +57,7 @@ public:
 
    double GetLaguMain(double, int);
    double GetMaValue(int);
+   int    GetSignal();
    //double GetHaHigh(int);
    //double GetHaLow(int);
 //   double GetMaValue(int,int);
@@ -66,13 +71,36 @@ BreakSignal::BreakSignal(void):m_symbol(NULL),
    m_digits = MarketInfo(m_symbol, MODE_DIGITS);
 }
 
+BreakSignal::BreakSignal(string symbol, int timeframe):m_symbol(symbol),
+                                                        m_timeframe(timeframe),
+                                                        m_gamma_small(0.6),
+                                                        m_gamma_big(0.75)
+{
+
+}
+
 BreakSignal::~BreakSignal(void){}
 
-bool BreakSignal::Init(string symbol){
-   m_digits = MarketInfo(m_symbol, MODE_DIGITS);
-   m_symbol = symbol;
-   return true;
+bool BreakSignal::Init(string symbol, int timeframe){
+    m_symbol = symbol;
+    m_timeframe = timeframe;
+    m_digits = MarketInfo(m_symbol, MODE_DIGITS);
+    return true;
 }
+
+void InitLagu(double gamma_big, double gamma_small){
+   //m_gamma_big = gamma_big;
+   //m_gamma_small = gamma_small;
+}
+
+string BreakSignal::Symbol(){
+    return m_symbol;
+}
+
+void BreakSignal::Symbol(string symbol){
+    m_symbol = symbol;
+}
+
 
 //bool BreakSignal::InitMa(int period, int shift){
 //   m_shift_ma = shift;
@@ -261,3 +289,8 @@ double BreakSignal::GetMaValue(int shift=1){
    return NormalizeDouble(iMA(m_symbol, m_timeframe, 5, 2, MODE_EMA,PRICE_CLOSE,shift), m_digits);
 }
 
+int BreakSignal::GetSignal(){
+    if(GetBuySignal(3) > 0) return 1;
+    if(GetSellSignal(3) > 0) return -1;
+    return 0;
+}
