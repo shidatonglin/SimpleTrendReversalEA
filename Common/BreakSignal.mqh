@@ -32,6 +32,9 @@ private:
 //   int     m_shift_ma;
    string  m_symbol;
    int     m_timeframe;
+   int     m_digits;
+   double  m_gamma_small;
+   double  m_gamma_big;
 
 public:
    BreakSignal();
@@ -47,20 +50,26 @@ public:
    int    GetLastBarBelowMA(int);
    int    GetLastBarUpMA(int);
    int    GetLastCrossBarIndex(int, int);
+
+   double GetLaguMain(double, int);
+   double GetMaValue(int);
    //double GetHaHigh(int);
    //double GetHaLow(int);
 //   double GetMaValue(int,int);
 };
 
 BreakSignal::BreakSignal(void):m_symbol(NULL),
-                                m_timeframe(PERIOD_H4)
+                               m_timeframe(PERIOD_H4),
+                               m_gamma_small(0.6),
+                               m_gamma_big(0.75)
 {
-
+   m_digits = MarketInfo(m_symbol, MODE_DIGITS);
 }
 
 BreakSignal::~BreakSignal(void){}
 
 bool BreakSignal::Init(string symbol){
+   m_digits = MarketInfo(m_symbol, MODE_DIGITS);
    m_symbol = symbol;
    return true;
 }
@@ -75,42 +84,52 @@ bool BreakSignal::Init(string symbol){
 //   return iMA(m_symbol, m_timeframe, m_period_ma, m_shift_ma, MODE_EMA,PRICE_CLOSE,barShift);
 //}
 
-double BreakSignal::GetHaOpen(int shift){
-	return iCustom(m_symbol, m_timeframe, "Heiken Ashi", 0,0,0,0, 2, 1);
+double BreakSignal::GetHaOpen(int shift=1){
+	return NormalizeDouble(iCustom(m_symbol, m_timeframe, "Heiken Ashi", 0,0,0,0, 2, shift),m_digits);
 }
 
-double BreakSignal::GetHaClose(int shift){
-	return iCustom(m_symbol, m_timeframe, "Heiken Ashi", 0,0,0,0, 3, 1);
+double BreakSignal::GetHaClose(int shift=1){
+	return NormalizeDouble(iCustom(m_symbol, m_timeframe, "Heiken Ashi", 0,0,0,0, 3, shift),m_digits);
 }
 
-int BreakSignal::GetBuySignal(int shift, int maxBarShift){
+int BreakSignal::GetBuySignal(int maxBarShift, int shift = 1){
 
     // For buy signal
     bool barColorChange = false;
-    int lastChangeBar = GetLastBearishBar();
+    int lastChangeBar = GetLastBearishBar(shift);
+
     if(GetHaClose(shift) > GetHaOpen(shift)   // Buy Bar
         && lastChangeBar != -1               //
-        && lastChangeBar <= maxBarShift
+        && lastChangeBar <= (maxBarShift + shift)
     ){
         barColorChange = true;
     }
 
     bool maCrossed = false;
-    double maValue = iMA(m_symbol, m_timeframe, 5, 2, MODE_EMA,PRICE_CLOSE,shift);
+    //double maValue = iMA(m_symbol, m_timeframe, 5, 2, MODE_EMA,PRICE_CLOSE,shift);
+    double maValue = GetMaValue(shift);
     if(GetHaClose(shift) > maValue
-        && GetLastBarBelowMA() != -1
-        && GetLastBarBelowMA() <= maxBarShift){
+        && GetLastBarBelowMA(shift) != -1
+        && GetLastBarBelowMA(shift) <= (maxBarShift + shift)){
         maCrossed = true;
     }
 
     bool laguCross = false;
-    double laguSignal = iCustom(m_symbol, m_timeframe, "Laguerre-ACS1", 0.6, 100,2, 1, 1);
-    double laguMain   = iCustom(m_symbol, m_timeframe, "Laguerre-ACS1", 0.75,100,2, 1, 1);
+    double laguSignal = GetLaguMain(m_gamma_small,shift);
+    double laguMain   = GetLaguMain(m_gamma_big,shift);
+    //Print("laguSignal-->",laguSignal);
+    //Print("laguMain-->",laguMain);
     if(laguSignal > laguMain
-        && GetLastCrossBarIndex(1) != -1
-        && GetLastCrossBarIndex(1) < maxBarShift){
+        && GetLastCrossBarIndex(1,shift) != -1
+        && GetLastCrossBarIndex(1,shift) < (maxBarShift + shift)){
         laguCross = true;
     }
+
+    //Print("barColorChange-->",barColorChange);
+
+    //Print("maCrossed-->",maCrossed);
+
+    //Print("laguCross-->",laguCross);
 
     if(barColorChange && maCrossed && laguCross){
         return 1;
@@ -119,10 +138,10 @@ int BreakSignal::GetBuySignal(int shift, int maxBarShift){
     }
 }
 
-int BreakSignal::GetSellSignal(int shift, int maxBarShift){
+int BreakSignal::GetSellSignal(int maxBarShift, int shift = 1){
     // For Sell signal
     bool barColorChange = false;
-    int lastChangeBar = GetLastBearishBar();
+    int lastChangeBar = GetLastBearishBar(shift);
     if(GetHaClose(shift) < GetHaOpen(shift)   // Buy Bar
         && lastChangeBar != -1               //
         && lastChangeBar >= maxBarShift
@@ -131,19 +150,20 @@ int BreakSignal::GetSellSignal(int shift, int maxBarShift){
     }
 
     bool maCrossed = false;
-    double maValue = iMA(m_symbol, m_timeframe, 5, 2, MODE_EMA,PRICE_CLOSE,shift);
+    //double maValue = iMA(m_symbol, m_timeframe, 5, 2, MODE_EMA,PRICE_CLOSE,shift);
+    double maValue = GetMaValue(shift);
     if(GetHaClose(shift) < maValue
-        && GetLastBarBelowMA() != -1
-        && GetLastBarBelowMA() >= maxBarShift){
+        && GetLastBarBelowMA(shift) != -1
+        && GetLastBarBelowMA(shift) >= maxBarShift){
         maCrossed = true;
     }
 
     bool laguCross = false;
-    double laguSignal = iCustom(m_symbol, m_timeframe, "Laguerre-ACS1", 0.6, 100,2, 1, 1);
-    double laguMain   = iCustom(m_symbol, m_timeframe, "Laguerre-ACS1", 0.75,100,2, 1, 1);
+    double laguSignal = GetLaguMain(m_gamma_small,shift);
+    double laguMain   = GetLaguMain(m_gamma_big,shift);
     if(laguSignal < laguMain
-        && GetLastCrossBarIndex(-1) != -1
-        && GetLastCrossBarIndex(-1) < maxBarShift){
+        && GetLastCrossBarIndex(-1,shift) != -1
+        && GetLastCrossBarIndex(-1,shift) < maxBarShift){
         laguCross = true;
     }
 
@@ -155,7 +175,7 @@ int BreakSignal::GetSellSignal(int shift, int maxBarShift){
 }
 
 int BreakSignal::GetLastBearishBar(int start = 1){
-    for(int i=start+1; i< MAX_SEARCH_BAR; i++){
+    for(int i=start+1; i< start+MAX_SEARCH_BAR; i++){
         if(GetHaClose(i) < GetHaOpen(i)){
             return i;
         }
@@ -164,7 +184,7 @@ int BreakSignal::GetLastBearishBar(int start = 1){
 }
 
 int BreakSignal::GetLastBullishBar(int start = 1){
-    for(int i=start+1; i< MAX_SEARCH_BAR; i++){
+    for(int i=start+1; i< start+MAX_SEARCH_BAR; i++){
         if(GetHaClose(i) > GetHaOpen(i)){
             return i;
         }
@@ -174,8 +194,10 @@ int BreakSignal::GetLastBullishBar(int start = 1){
 
 int BreakSignal::GetLastBarBelowMA(int start = 1){
     double maValue = 0.0;
-    for(int i=start+1; i< MAX_SEARCH_BAR; i++){
-        maValue = iMA(m_symbol, m_timeframe, 5, 2, MODE_EMA,PRICE_CLOSE,i);
+    for(int i=start+1; i< start+MAX_SEARCH_BAR; i++){
+        //maValue = iMA(m_symbol, m_timeframe, 5, 2, MODE_EMA,PRICE_CLOSE,i);
+        maValue = GetMaValue(i);
+        //Print((i),"--->",maValue);
         if(GetHaClose(i) < maValue){
             return i;
         }
@@ -185,8 +207,9 @@ int BreakSignal::GetLastBarBelowMA(int start = 1){
 
 int BreakSignal::GetLastBarUpMA(int start = 1){
     double maValue = 0.0;
-    for(int i=start+1; i< MAX_SEARCH_BAR; i++){
-        maValue = iMA(m_symbol, m_timeframe, 5, 2, MODE_EMA,PRICE_CLOSE,i);
+    for(int i=start+1; i< start+MAX_SEARCH_BAR; i++){
+        //maValue = iMA(m_symbol, m_timeframe, 5, 2, MODE_EMA,PRICE_CLOSE,i);
+        maValue = GetMaValue(i);
         if(GetHaClose(i) > maValue){
             return i;
         }
@@ -196,18 +219,29 @@ int BreakSignal::GetLastBarUpMA(int start = 1){
 
 int BreakSignal::GetLastCrossBarIndex(int direction, int start = 1){
     double laguSignal = 0, laguMain = 0;
-    for(int i=start+1; i< MAX_SEARCH_BAR; i++){
-        laguSignal = iCustom(m_symbol, m_timeframe, "Laguerre-ACS1", 0.6, 100,2, 1, i);
-        laguMain   = iCustom(m_symbol, m_timeframe, "Laguerre-ACS1", 0.75,100,2, 1, i);
-        if(direction == 1 && laguSignal < laguMain){
+    for(int i=start+1; i< start+MAX_SEARCH_BAR; i++){
+        //laguSignal = iCustom(m_symbol, m_timeframe, "Laguerre-ACS1", 0.6, 1000,2, 0, i);
+        //laguMain   = iCustom(m_symbol, m_timeframe, "Laguerre-ACS1", 0.75,1000,2, 0, i);
+        laguSignal = GetLaguMain(0.6,i);
+        laguMain = GetLaguMain(0.75,i);
+        //Print((i),"--->",laguSignal);
+        if(direction == 1 && laguSignal <= laguMain){
             return i;
         }
-        if(direction == -1 && laguSignal > laguMain){
+        if(direction == -1 && laguSignal >= laguMain){
             return i;
         }
     }
     return -1;
 }
 
+double BreakSignal::GetLaguMain(double gamma,int shift=1){
+   return NormalizeDouble(iCustom(m_symbol, m_timeframe, "Laguerre-ACS1",
+                                 gamma,100,2, 0, shift),2);
+}
 
+
+double BreakSignal::GetMaValue(int shift=1){
+   return NormalizeDouble(iMA(m_symbol, m_timeframe, 5, 2, MODE_EMA,PRICE_CLOSE,shift), m_digits);
+}
 
