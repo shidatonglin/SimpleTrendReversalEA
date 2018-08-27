@@ -8,8 +8,11 @@
 #property version   "1.00"
 #property strict
 #include <BreakSignal.mqh>
+#include <BreakSignalManager.mqh>
 
-BreakSignal signal;
+BreakSignal signal(NULL,0);
+SignalManager manager;
+
 
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
@@ -19,10 +22,12 @@ int OnInit()
 //---
    //TestLagu();
    //TestBreakSignal();
-   TestSignal(3);
+   TestSignal(4);
    //TestBarSignal(81,4);
    //TestLagu();
    //TestBarSellSignal(67,4);
+   
+   //TestManager();
 //---
    return(INIT_SUCCEEDED);
   }
@@ -68,16 +73,18 @@ void TestBreakSignal(int i=1){
 }
 
 void TestSignal(int maxBarCount=3){
+   Print("start to test");
    int result = 0;
-   for(int i=0; i< 100;i++){
+   for(int i=0; i< 120;i++){
 
       result = signal.GetBuySignal(maxBarCount,i);
+      //Print("result--->",result);
       if(result != 0)
-         Print("GetBuySignal ",( i ),"---->",result);
+         Print("Buy ",( i )," Time :",  iTime(NULL,0,i),"---->",result);
 
       result = signal.GetSellSignal(maxBarCount,i);
       if(result != 0)
-         Print("GetSellSignal ",( i ),"---->",result);
+         Print("Sell ",( i )," Time :",  iTime(NULL,0,i),"---->",result);
    }
    //TestBreakSignal(40);
    //
@@ -92,4 +99,8 @@ void TestBarSellSignal(int shift, int maxBarCount=3){
    Print("GetSellSignal ",( shift ),"---->",signal.GetSellSignal(maxBarCount,shift));
 }
 
+void TestManager(){
+   manager.CheckSignal();
+   manager.SendMassage("Test send functions");
+}
 

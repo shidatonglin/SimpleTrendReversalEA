@@ -35,6 +35,11 @@ private:
    int     m_digits;
    double  m_gamma_small;
    double  m_gamma_big;
+   int          m_ma_period;        // MA averaging period
+   int          m_ma_shift;         // MA shift
+   int          m_ma_method;        // averaging method
+   int          m_ma_applied_price;    // applied price
+   
 
 public:
    BreakSignal(void);
@@ -42,7 +47,8 @@ public:
    ~BreakSignal();
    bool   Init(string, int);
    void   InitLagu(double, double);
-//   bool   InitMa(int,int);
+   void   InitMa(int,int,int,int);//---
+
    string Symbol();
    void   Symbol(string symbol);
    double GetHaOpen(int);
@@ -66,7 +72,11 @@ public:
 BreakSignal::BreakSignal(void):m_symbol(NULL),
                                m_timeframe(PERIOD_H4),
                                m_gamma_small(0.6),
-                               m_gamma_big(0.75)
+                               m_gamma_big(0.75),
+                               m_ma_applied_price(PRICE_CLOSE),
+                               m_ma_method(MODE_EMA),
+                               m_ma_period(5),
+                               m_ma_shift(2)
 {
    m_digits = MarketInfo(m_symbol, MODE_DIGITS);
 }
@@ -74,9 +84,13 @@ BreakSignal::BreakSignal(void):m_symbol(NULL),
 BreakSignal::BreakSignal(string symbol, int timeframe):m_symbol(symbol),
                                                         m_timeframe(timeframe),
                                                         m_gamma_small(0.6),
-                                                        m_gamma_big(0.75)
+                                                        m_gamma_big(0.75),
+                                                        m_ma_applied_price(PRICE_CLOSE),
+                                                        m_ma_method(MODE_EMA),
+                                                        m_ma_period(5),
+                                                        m_ma_shift(2)
 {
-
+   m_digits = MarketInfo(m_symbol, MODE_DIGITS);
 }
 
 BreakSignal::~BreakSignal(void){}
@@ -88,9 +102,16 @@ bool BreakSignal::Init(string symbol, int timeframe){
     return true;
 }
 
-void InitLagu(double gamma_big, double gamma_small){
-   //m_gamma_big = gamma_big;
-   //m_gamma_small = gamma_small;
+void BreakSignal::InitLagu(double gamma_big, double gamma_small){
+   m_gamma_big = gamma_big;
+   m_gamma_small = gamma_small;
+}
+
+void BreakSignal::InitMa(int period, int shift, int mode, int price){
+   m_ma_period = period;
+   m_ma_shift = shift;
+   m_ma_method = mode;
+   m_ma_applied_price = price;
 }
 
 string BreakSignal::Symbol(){
@@ -286,7 +307,9 @@ double BreakSignal::GetLaguMain(double gamma,int shift=1){
 
 
 double BreakSignal::GetMaValue(int shift=1){
-   return NormalizeDouble(iMA(m_symbol, m_timeframe, 5, 2, MODE_EMA,PRICE_CLOSE,shift), m_digits);
+   //return NormalizeDouble(iMA(m_symbol, m_timeframe, 5, 2, MODE_EMA,PRICE_CLOSE,shift), m_digits);
+   return NormalizeDouble(iMA(m_symbol, m_timeframe, m_ma_period, m_ma_shift
+                              , m_ma_method ,m_ma_applied_price,shift), m_digits);
 }
 
 int BreakSignal::GetSignal(){
