@@ -78,7 +78,7 @@ public:
 		_isUp=false;
 	}
 
-	bbMacdData Refersh(int shift){
+	bbMacdData Refresh(int shift){
 		double curUp= iCustom( _symbol, _timeFrame, BbMacd_Name, _fastPeriod,_slowPeriod,_signalPeriod
 							,_std, 0, shift);
 	    double curDown = iCustom( _symbol, _timeFrame, BbMacd_Name, _fastPeriod,_slowPeriod,_signalPeriod

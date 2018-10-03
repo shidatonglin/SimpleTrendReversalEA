@@ -7,6 +7,7 @@
 #property link      "https://www.mql5.com"
 #property strict
 
+#include "CBBMACD.mqh"
 /*
 For Ha break signal
 
@@ -39,12 +40,13 @@ private:
    int          m_ma_shift;         // MA shift
    int          m_ma_method;        // averaging method
    int          m_ma_applied_price;    // applied price
-   
+   CBbMacd *    m_bbmacd;
 
 public:
    BreakSignal(void);
    BreakSignal(string, int);
    ~BreakSignal();
+
    bool   Init(string, int);
    void   InitLagu(double, double);
    void   InitMa(int,int,int,int);//---
@@ -67,6 +69,12 @@ public:
    //double GetHaHigh(int);
    //double GetHaLow(int);
 //   double GetMaValue(int,int);
+   bool   IsBbMacdUp(int);
+   bool   IsBbMacdDown(int);
+   bool   IsGenesisUp(int shift);
+   bool   IsGenesisDown(int shift);
+
+
 };
 
 BreakSignal::BreakSignal(void):m_symbol(NULL),
@@ -79,6 +87,8 @@ BreakSignal::BreakSignal(void):m_symbol(NULL),
                                m_ma_shift(2)
 {
    m_digits = MarketInfo(m_symbol, MODE_DIGITS);
+   //string symbol, int fast, int slow, int signal, double stdvalue, int tf=0
+   m_bbmacd = new CBbMacd(m_symbol, 12, 26, 10, 1, m_timeframe);
 }
 
 BreakSignal::BreakSignal(string symbol, int timeframe):m_symbol(symbol),
@@ -91,9 +101,12 @@ BreakSignal::BreakSignal(string symbol, int timeframe):m_symbol(symbol),
                                                         m_ma_shift(2)
 {
    m_digits = MarketInfo(m_symbol, MODE_DIGITS);
+   m_bbmacd = new CBbMacd(m_symbol, 12, 26, 10, 1, m_timeframe);
 }
 
-BreakSignal::~BreakSignal(void){}
+BreakSignal::~BreakSignal(void){
+    delete m_bbmacd;
+}
 
 bool BreakSignal::Init(string symbol, int timeframe){
     m_symbol = symbol;
@@ -316,4 +329,44 @@ int BreakSignal::GetSignal(){
     if(GetBuySignal(3) > 0) return 1;
     if(GetSellSignal(3) > 0) return -1;
     return 0;
+}
+
+bool BreakSignal::IsBbMacdDown(int shift){
+    m_bbmacd.Refresh(shift);
+    if(!m_bbmacd.isUp(shift) && m_bbmacd.Trend(shift) == DOWN){
+        return true;
+    }
+    return false;
+}
+
+bool BreakSignal::IsBbMacdUp(int shift){
+    m_bbmacd.Refresh(shift);
+    if(m_bbmacd.isUp(shift) && m_bbmacd.Trend(shift) == UP){
+        return true;
+    }
+    return false;
+}
+
+bool BreakSignal::IsGenesisUp(int shift){
+   string name = "GenesisMatrix 2.22";
+   double v0 = iCustom(NULL,0,name,0,shift);
+   double v2 = iCustom(NULL,0,name,2,shift);
+   double v4 = iCustom(NULL,0,name,4,shift);
+   double v6 = iCustom(NULL,0,name,6,shift);
+   if(v0>0&&v2>0&&v4>0&&v6>0){
+      return true;
+   }
+   return false;
+}
+
+bool BreakSignal::IsGenesisDown(int shift){
+   string name = "GenesisMatrix 2.22";
+   double v1 = iCustom(NULL,0,name,1,shift);
+   double v3 = iCustom(NULL,0,name,3,shift);
+   double v5 = iCustom(NULL,0,name,5,shift);
+   double v7 = iCustom(NULL,0,name,7,shift);
+   if(v1>0&&v3>0&&v5>0&&v7>0){
+      return true;
+   }
+   return false;
 }
