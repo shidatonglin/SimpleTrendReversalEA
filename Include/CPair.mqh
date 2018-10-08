@@ -15,6 +15,7 @@ extern string      TradePairs                   = "EURUSD USDJPY GBPUSD USDCHF U
 #include <CTimeFilter.mqh>
 #include <CNewsFilter.mqh>
 #include <CStrategy.mqh>
+#include <CStopLoss.mqh>
 
 //--------------------------------------------------------------------
 class CPair
@@ -31,6 +32,7 @@ private:
    bool           _allowedToTradeTimeFilter;
    IStrategy*     _strategy;
    CSignal*       _signal;
+   CStopLoss      _stoploss;
    
 public: 
    //--------------------------------------------------------------------
@@ -400,7 +402,7 @@ public:
             if (OrderHiddenSL > 0 && slZigZag < orderSl) sl = orderSl;
          }
          Print(_symbol," open buy trade @", DoubleToStr(price, 5), " sl:", DoubleToStr(sl, 5));
-         int ticket = _orders.OpenBuyOrder(_orders.GetLotSize(sl, OP_BUY), 0, 0);
+         int ticket = _orders.OpenBuyOrder(_orders.GetLotSize(sl, OP_BUY), price - _stoploss.GetGetStopLoss(), price + _stoploss.GetTakeProfit());
          if (ticket >= 0) _trailingStop.SetInitalStoploss(ticket, sl);
       }
       else if (_signal.IsSell)
@@ -420,7 +422,7 @@ public:
             if (OrderHiddenSL > 0 && slZigZag > orderSl) sl = orderSl;
          }
          Print(_symbol," open sell trade @", DoubleToStr(price, 5), " sl:", DoubleToStr(sl, 5));
-         int ticket = _orders.OpenSellOrder(_orders.GetLotSize(sl, OP_SELL), 0, 0);
+         int ticket = _orders.OpenSellOrder(_orders.GetLotSize(sl, OP_SELL), price - _stoploss.GetGetStopLoss(), price + _stoploss.GetTakeProfit());
          if (ticket >= 0) _trailingStop.SetInitalStoploss(ticket, sl);
       }
    }
