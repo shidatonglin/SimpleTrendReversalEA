@@ -573,6 +573,8 @@ int start() {
 //		TrendStrength(MaxGridSize);
 //		TextDisplay = TextDisplay + "\nEntryLevel:" + EntryLevel + "   UpTrend:"+SWITCH(SellReady)+" "+DoubleToStr(UpTrend,1) + "   DownTrend:"+SWITCH(BuyReady)+" "+DoubleToStr(DownTrend,1);
 		string displayTrend = "\n\n Major Trend(D1) : ";
+		BuyReady = false;
+		SellReady = false;
 		if(TradeLong){
 			BuyReady = true;
 		} else if(TradeShort){
@@ -607,7 +609,7 @@ return(0);
 void CloseAllBuy(){
    for(int i=0; i < OrdersTotal();i++){
       if(OrderSelect(i,SELECT_BY_POS,MODE_TRADES)){
-         if(OrderMagicNumber() == Magic && OrderType()==OP_BUY){
+         if(OrderMagicNumber() == Magic && OrderType()==OP_BUY && OrderSymbol() == Symbol()){
             OrderClose(OrderTicket(),OrderLots(),MarketInfo(OrderSymbol(),MODE_BID),SLIPPAGE());
          }
       }
@@ -617,7 +619,7 @@ void CloseAllBuy(){
 void CloseAllSell(){
    for(int i=0; i < OrdersTotal();i++){
       if(OrderSelect(i,SELECT_BY_POS,MODE_TRADES)){
-         if(OrderMagicNumber() == Magic && OrderType()==OP_SELL){
+         if(OrderMagicNumber() == Magic && OrderType()==OP_SELL && OrderSymbol() == Symbol()){
             OrderClose(OrderTicket(),OrderLots(),MarketInfo(OrderSymbol(),MODE_ASK),SLIPPAGE());
          }
       }
@@ -628,7 +630,7 @@ int AllOrders(int orderType){
    int count = 0;
    for(int i=0; i < OrdersTotal();i++){
       if(OrderSelect(i,SELECT_BY_POS,MODE_TRADES)){
-         if(OrderMagicNumber() == Magic && OrderType()==orderType){
+         if(OrderMagicNumber() == Magic && OrderType()==orderType && OrderSymbol() == Symbol()){
             count ++;
          }
       }
