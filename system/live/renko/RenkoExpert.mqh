@@ -10,6 +10,7 @@
 #include <MQLx\Base\Expert\ExpertAdvisorsBase.mqh>
 #include <Indicators\Custom.mqh>
 #include <RenkoSignal.mqh>
+#include <CStopLoss.mqh>
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
@@ -33,6 +34,7 @@ enum ENUM_MM_TYPE
 
 input ENUM_MM_TYPE mm_type=MM_FIXED_FRACTIONAL;
 
+input bool   usefixstop = true;
 input double stop_loss=500;
 input double take_profit=1000;
 input ENUM_STOP_TYPE stop_type_main=STOP_TYPE_BROKER;
@@ -362,13 +364,24 @@ int OnInit()
    //expert.AddTimes(GetPointer(time_filters));
    */
    CStops *stops=new CStops();
-   CStop *main=new CStop("main");
-   main.StopType(stop_type_main);
-   main.VolumeType(VOLUME_TYPE_PERCENT_TOTAL);
-   main.Main(true);
-   main.StopLoss(stop_loss);
-   main.TakeProfit(take_profit);
-   stops.Add(GetPointer(main));
+   if(usefixstop){
+     CStop *main=new CStop("main");
+     main.StopType(stop_type_main);
+     main.VolumeType(VOLUME_TYPE_PERCENT_TOTAL);
+     main.Main(true);
+     main.StopLoss(stop_loss);
+     main.TakeProfit(take_profit);
+     stops.Add(GetPointer(main));
+   } else {
+     CCustomStop *main=new CCustomStop("main");
+     main.StopType(stop_type_main);
+     main.VolumeType(VOLUME_TYPE_PERCENT_TOTAL);
+     main.Main(true);
+  //main.StopLoss(stop_loss);
+  //main.TakeProfit(take_profit);
+     stops.Add(GetPointer(main));
+   }
+   
 
    CTrails *trails=new CTrails();
    CTrail *trail=new CTrail();
@@ -531,4 +544,102 @@ bool SignalRenko::ShortCondition(void)
   {
    //return m_close<m_ma.Main(m_signal_bar);
    return m_renko_signal == -1;
+  }
+
+  //+------------------------------------------------------------------+
+class CCustomStop : public CStop
+  {
+private:
+  CStopLoss          m_stop;
+public:
+                     CCustomStop(const string);
+                    ~CCustomStop(void);
+   virtual double    StopLossCustom(const string,const ENUM_ORDER_TYPE,const double);
+   virtual double    TakeProfitCustom(const string,const ENUM_ORDER_TYPE,const double);
+  };
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+CCustomStop::CCustomStop(const string name) : CStop(name)
+  {
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+CCustomStop::~CCustomStop(void)
+  {
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+double CCustomStop::StopLossCustom(const string symbol,const ENUM_ORDER_TYPE type,const double price)
+  {
+   double array[1];
+   double val=0;
+   m_symbol=m_symbol_man.Get(symbol);
+   if(!CheckPointer(m_symbol))
+      return 0;
+   if(type==ORDER_TYPE_BUY)
+     {
+      if(CopyLow(symbol,PERIOD_CURRENT,1,1,array))
+        {
+         val=array[0];
+        }
+     }
+   else if(type==ORDER_TYPE_SELL)
+     {
+      if(CopyHigh(symbol,PERIOD_CURRENT,1,1,array))
+        {
+         val=array[0];
+        }
+     }
+   if(val>0)
+     {
+      double distance=MathAbs(price-val)/m_symbol.Point();
+      if(distance<200)
+        {
+         if(type==ORDER_TYPE_BUY)
+            val = price-200*m_symbol.Point();
+         else if(type==ORDER_TYPE_SELL)
+            val=price+200*m_symbol.Point();
+        }
+     }
+   return val;
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+double CCustomStop::TakeProfitCustom(const string symbol,const ENUM_ORDER_TYPE type,const double price)
+  {
+   double array[1];
+   double val=0;
+   m_symbol=m_symbol_man.Get(symbol);
+   if(!CheckPointer(m_symbol))
+      return 0;
+   if(type==ORDER_TYPE_BUY)
+     {
+      if(CopyHigh(symbol,PERIOD_CURRENT,1,1,array))
+        {
+         val=array[0];
+        }
+     }
+   else if(type==ORDER_TYPE_SELL)
+     {
+      if(CopyLow(symbol,PERIOD_CURRENT,1,1,array))
+        {
+         val=array[0];
+        }
+     }
+   if(val>0)
+     {
+      double distance=MathAbs(price-val)/m_symbol.Point();
+      if(distance<200)
+        {
+         if(type==ORDER_TYPE_BUY)
+            val = price+200*m_symbol.Point();
+         else if(type==ORDER_TYPE_SELL)
+            val=price-200*m_symbol.Point();
+        }
+     }
+   return val;
   }
