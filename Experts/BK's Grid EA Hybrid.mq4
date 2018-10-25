@@ -349,11 +349,11 @@ int ManageBuy() {
 		}
 	}
 
-	TextDisplay	= TextDisplay + "\nB"+SWITCH(_EnableAutoBuy )+": " + count 
-   	+ "   V: " + DoubleToStr(TotalVolume,LotDigits) + "/" + DoubleToStr(MaxTotalLot,LotDigits) + "   @ " 
-   	+ DoubleToStr(AveragePrice,Digits) + "   TP: " + DoubleToStr(TP,Digits) 
-   	+ "   SL: " + DoubleToStr(SL,Digits) + "   G:" + DoubleToStr((Ask-AveragePrice)/Punto(Symbol()),1) 
-   	+ "/" + DoubleToStr(NextStep(TotalVolume),1) + "   ("+ MoneyToStr(TotalProfit) + "/" 
+	TextDisplay	= TextDisplay + "\nBuy"+SWITCH(_EnableAutoBuy )+": Total Orders: " + count 
+   	+ "   TotalVolume/MaxTotalLot:: " + DoubleToStr(TotalVolume,LotDigits) + "/" + DoubleToStr(MaxTotalLot,LotDigits) 
+   	+ "   @Average " + DoubleToStr(AveragePrice,Digits) + "   TP: " + DoubleToStr(TP,Digits) 
+   	+ "   SL: " + DoubleToStr(SL,Digits) + "   Grid/NextStep:" + DoubleToStr((Ask-AveragePrice)/Punto(Symbol()),1) 
+   	+ "/" + DoubleToStr(NextStep(TotalVolume),1) + "   CurrentProfit/ExpectedProfit("+ MoneyToStr(TotalProfit) + "/" 
    	+ MoneyToStr(TotalVolume*(TP-AveragePrice)*MarketInfo(Symbol(),MODE_TICKVALUE)/Point)+")";
    	
 	DrawBox ("BuyBox",	FirstOrder-Period()*120, TimeCurrent()+Period()*120, AveragePrice, TP,  BuyColor>>3);
@@ -464,11 +464,11 @@ int ManageSell() {
 		}
 	}
 
-	TextDisplay	= TextDisplay + "\nS"+SWITCH(_EnableAutoSell)+": " + count 
-   	+ "   V: " + DoubleToStr(TotalVolume,LotDigits) + "/" + DoubleToStr(MaxTotalLot,LotDigits) 
-   	+ "   @ " + DoubleToStr(AveragePrice,Digits) + "   TP: " + DoubleToStr(TP,Digits) 
-   	+ "   SL: " + DoubleToStr(SL,Digits) + "   G:" + DoubleToStr((AveragePrice-Bid)/Punto(Symbol()),1) 
-   	+ "/" + DoubleToStr(NextStep(TotalVolume),1) + "   (" + MoneyToStr(TotalProfit) + "/" 
+	TextDisplay	= TextDisplay + "\nSell"+SWITCH(_EnableAutoSell)+": Total Orders: " + count 
+   	+ "   TotalVolume/MaxTotalLot: " + DoubleToStr(TotalVolume,LotDigits) + "/" + DoubleToStr(MaxTotalLot,LotDigits) 
+   	+ "   @Average " + DoubleToStr(AveragePrice,Digits) + "   TP: " + DoubleToStr(TP,Digits) 
+   	+ "   SL: " + DoubleToStr(SL,Digits) + "   Grid/NextStep:" + DoubleToStr((AveragePrice-Bid)/Punto(Symbol()),1) 
+   	+ "/" + DoubleToStr(NextStep(TotalVolume),1) + "   CurrentProfit/ExpectedProfit (" + MoneyToStr(TotalProfit) + "/" 
    	+ MoneyToStr(TotalVolume*(AveragePrice-TP)*MarketInfo(Symbol(),MODE_TICKVALUE)/Point)+")";
 	
 	DrawBox ("SellBox",	FirstOrder-Period()*120, TimeCurrent()+Period()*120, AveragePrice, TP,  SellColor>>3);
@@ -561,8 +561,10 @@ int start() {
 
 		StopLevel = MarketInfo(Symbol(),MODE_STOPLEVEL)*Punto(Symbol());
 		TextDisplay = 	EA_Name + " ("+version+")"+
-				"\nServer" + "   Time:"+TimeToStr(TimeCurrent(),TIME_DATE|TIME_SECONDS) + "   Spread:" + DoubleToStr(SPREAD(),1) + "   WatchDog:" + SWITCH(EnableWatchDog) + 
-				"\nMagic: " + Magic + "   BaseLot:" + DoubleToStr(BaseLot,LotDigits) + "   Grid:" + MinGridSize + "/" + MaxGridSize + " (Model:"+DoubleToStr(GridFactor,2) + ")   TakeProfit:" + TakeProfit + "   MaxSpread:" + MaxSpread;
+				"\nServer" + "   Time:"+TimeToStr(TimeCurrent(),TIME_DATE|TIME_SECONDS) + "   Spread:" + DoubleToStr(SPREAD(),1) 
+				+ "   WatchDog:" + SWITCH(EnableWatchDog) + 
+				"\nMagic: " + Magic + "   BaseLot:" + DoubleToStr(BaseLot,LotDigits) + "   Grid:" + MinGridSize + "/" + MaxGridSize 
+				+ " (GridFactor:"+DoubleToStr(GridFactor,2) + ")   TakeProfit:" + TakeProfit + "   MaxSpread:" + MaxSpread;
 
 		if (MaxDrawdown > 0) {
 			TextDisplay = TextDisplay + "   MaxDrawdown:" + DoubleToStr(MaxDrawdown*100,2)+"% (" + MoneyToStr(MaxDrawdown*AccountBalance())+")";
@@ -581,22 +583,32 @@ int start() {
 			SellReady = true;
 		} else {
 		   heikenAshi heikenData = heiken.Refersh(1);
+		   
+		   displayTrend += majorTrend.GetMajorTrend()==1 ? "buy" : majorTrend.GetMajorTrend()== -1 ? "sell" : "none";
+		   
+		   displayTrend += "\n\n heikenData(H4(1)) : " + (heikenData.isUp ? "buy" : "sell");
+		   
 			if(majorTrend.GetMajorTrend()==1 && heikenData.isUp){
-			   displayTrend += "buy";
+			//if(majorTrend.GetMajorTrend()==1){   
 				BuyReady = true;
-			}else if(majorTrend.GetMajorTrend()==-1 && !heikenData.isUp){
-			   displayTrend += "sell";
+			}//else if(majorTrend.GetMajorTrend()==-1){
+			else if(majorTrend.GetMajorTrend()==-1 && !heikenData.isUp){
+			   //displayTrend += "sell";
 				SellReady = true;
 			}else{
-			   displayTrend += "none";
+			   //displayTrend += "none";
 			}
 		}
 		
-		if(AllOrders(OP_BUY)>0){ManageBuy();}
-		if(AllOrders(OP_SELL)>0){ManageSell();}
+		//if(AllOrders(OP_BUY)>0){ManageBuy();}
+		//if(AllOrders(OP_SELL)>0){ManageSell();}
 		
 		if(BuyReady){CloseAllSell(); ManageBuy();}
+		else if(AllOrders(OP_BUY)>0){ManageBuy();}
+		
 		if(SellReady){CloseAllBuy(); ManageSell();}
+		else if(AllOrders(OP_SELL)>0){ManageSell();}
+		
 		TextDisplay = TextDisplay + CheckReport() + displayTrend;
 		Comment(TextDisplay);
 		if (EnableWatchDog) { WatchDog(); }
