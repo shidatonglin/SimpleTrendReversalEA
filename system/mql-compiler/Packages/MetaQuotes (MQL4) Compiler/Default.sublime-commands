@@ -1,6 +1,0 @@
-[
-    {
-        "caption": "Compile mql4",
-        "command": "mql4_compiler"
-    }
-]
