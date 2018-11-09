@@ -1,0 +1,12 @@
+.directory
+package-metadata.json
+*.pyc
+
+
+# Metatrader files #
+###################
+
+*.ex4
+*.log
+*.mql4
+*.mq4
