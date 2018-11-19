@@ -2,3 +2,4 @@ http://forex-indicators.net/mt4-indicators/laguerre-rsi
 https://www.abysse.co.jp/mt4-e/indicator_name.html
 http://www.desynced.net/fx/eas/backtests.php
 http://www.expert-advisor.it/expert-advisor-free.html
+http://forex.toyolab.com/
